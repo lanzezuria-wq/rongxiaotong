@@ -108,13 +108,25 @@ async function handleRegister() {
 
 <template>
   <div class="auth-wrapper">
-    <div class="auth-card" style="width: 460px">
-      <div class="auth-brand">
-        <h1 class="auth-brand-title">注册账号</h1>
-        <p class="auth-brand-sub">加入融销通，连接农业与金融</p>
-      </div>
+    <div class="auth-brand-panel">
+      <div class="panel-brand"><span class="panel-dot" />融销通</div>
+      <h1 class="panel-title">让农产品<br />卖得更好</h1>
+      <p class="panel-sub">农产品交易 · 融资服务 · 专家助力</p>
+      <ul class="panel-features">
+        <li>农户开店卖货，直达买家</li>
+        <li>联保小组互助，银行融资</li>
+        <li>农业专家在线答疑指导</li>
+      </ul>
+    </div>
 
-      <el-form ref="formRef" :model="form" :rules="rules" label-position="top" size="large">
+    <div class="auth-form-panel">
+      <div class="auth-card">
+        <div class="auth-brand">
+          <h1 class="auth-brand-title">创建账号</h1>
+          <p class="auth-brand-sub">加入融销通，连接农业与金融</p>
+        </div>
+
+        <el-form ref="formRef" :model="form" :rules="rules" label-position="top" size="large">
         <el-form-item label="手机号" prop="phone">
           <el-input v-model.trim="form.phone" placeholder="请输入 11 位手机号" maxlength="11">
             <template #prefix><el-icon><Iphone /></el-icon></template>
@@ -179,15 +191,20 @@ async function handleRegister() {
         </el-form-item>
       </el-form>
 
-      <div class="auth-footer">
-        已有账号？
-        <router-link to="/login" class="link">返回登录</router-link>
+        <div class="auth-footer">
+          已有账号？
+          <router-link to="/login" class="link">返回登录</router-link>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.auth-card {
+  width: 460px;
+}
+
 .role-hint {
   display: flex;
   gap: 6px;

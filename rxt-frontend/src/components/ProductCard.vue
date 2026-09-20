@@ -70,6 +70,11 @@ function goDetail() {
   width: 100%;
   height: 180px;
   display: block;
+  transition: transform 0.35s ease;
+}
+
+.product-card:hover .product-cover {
+  transform: scale(1.06);
 }
 
 .cover-fallback {

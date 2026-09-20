@@ -129,13 +129,17 @@ function onCommand(cmd) {
 }
 
 .top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
   gap: 32px;
   height: 60px;
   padding: 0 24px;
   background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #eef0f3;
+  box-shadow: 0 1px 4px rgba(31, 35, 41, 0.04);
 }
 
 .brand {

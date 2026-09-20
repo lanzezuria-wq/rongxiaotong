@@ -23,6 +23,40 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ==========================================================================
+   品牌主题 —— 覆盖 Element Plus 主色为「融销通绿」
+   统一全站的 primary 按钮 / 链接 / 单选 / 开关 / 分页选中态，
+   避免默认蓝色与品牌绿色打架。
+   ========================================================================== */
+
+:root {
+  --el-color-primary: #16a34a;
+  --el-color-primary-light-3: #4ade80;
+  --el-color-primary-light-5: #86efac;
+  --el-color-primary-light-7: #bbf7d0;
+  --el-color-primary-light-8: #dcfce7;
+  --el-color-primary-light-9: #f0fdf4;
+  --el-color-primary-dark-2: #15803d;
+}
+
+/* 主按钮换成渐变，比纯色更有质感 */
+.el-button--primary {
+  background-image: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+}
+
+/* 全局动画关键帧：渐变背景缓慢流动 */
+@keyframes hero-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 /* ---------- 页面通用骨架 ---------- */
 
 /** 页面内容的最大宽度容器，避免在大屏上表格被拉得过宽 */
@@ -81,33 +115,136 @@ body {
   margin-top: 16px;
 }
 
-/* ---------- 登录 / 注册页 ---------- */
+/* ---------- 登录 / 注册页（左右分栏） ---------- */
 
 .auth-wrapper {
   display: flex;
+  min-height: 100vh;
+  background: #fff;
+}
+
+/* 左侧品牌区 —— 动画渐变 + 光斑 */
+.auth-brand-panel {
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 44%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px;
+  color: #fff;
+  background: linear-gradient(150deg, #064e3b 0%, #16a34a 50%, #34d399 100%);
+  background-size: 200% 200%;
+  animation: hero-gradient 12s ease infinite;
+}
+
+.auth-brand-panel::before,
+.auth-brand-panel::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+.auth-brand-panel::before {
+  width: 420px;
+  height: 420px;
+  background: rgba(255, 255, 255, 0.14);
+  top: -140px;
+  right: -140px;
+}
+
+.auth-brand-panel::after {
+  width: 320px;
+  height: 320px;
+  background: rgba(187, 247, 208, 0.18);
+  bottom: -120px;
+  left: -100px;
+}
+
+.auth-brand-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.panel-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.panel-dot {
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
+}
+
+.panel-title {
+  margin: 44px 0 0;
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.panel-sub {
+  margin: 16px 0 0;
+  font-size: 15px;
+  opacity: 0.92;
+}
+
+.panel-features {
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 14px;
+}
+
+.panel-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-features li::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0.9;
+}
+
+/* 右侧表单区 */
+.auth-form-panel {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #eef4ff 0%, #f5f7fa 55%, #eaf7f2 100%);
+  padding: 40px;
+  background: #fbfcfd;
 }
 
 .auth-card {
-  width: 420px;
-  padding: 36px 36px 28px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(31, 35, 41, 0.08);
+  width: 380px;
 }
 
 .auth-brand {
   margin-bottom: 26px;
-  text-align: center;
 }
 
 .auth-brand-title {
   margin: 0;
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 700;
   color: #1f2329;
 }
 
@@ -124,15 +261,22 @@ body {
   color: #8a9099;
 }
 
-/** 表单下方那条"提示当前可用的测试账号"的浅色说明块 */
+/** 表单上方"提示测试账号"的浅色说明块 */
 .tip-box {
   padding: 10px 12px;
   margin-bottom: 20px;
   font-size: 12px;
   line-height: 1.8;
-  color: #6b7280;
-  background: #f7f9fc;
-  border-radius: 6px;
+  color: #065f46;
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .auth-brand-panel {
+    display: none;
+  }
 }
 
 /* ---------- 文字状态色 ---------- */

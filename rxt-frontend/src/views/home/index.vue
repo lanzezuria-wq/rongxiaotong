@@ -56,22 +56,32 @@ onMounted(load)
         </el-carousel-item>
       </el-carousel>
       <div v-else class="hero-fallback">
+        <div class="hero-blob hero-blob-1" />
+        <div class="hero-blob hero-blob-2" />
+        <div class="hero-blob hero-blob-3" />
         <h1>融销通 · 让农产品卖得更好</h1>
         <p>农产品交易 · 融资服务 · 专家助力 一站式农业金融服务平台</p>
+        <div class="hero-actions">
+          <el-button size="large" round class="hero-cta" @click="$router.push('/products')">去逛农产品</el-button>
+          <el-button size="large" round class="hero-ghost" @click="$router.push('/experts')">咨询专家</el-button>
+        </div>
       </div>
     </section>
 
     <!-- 平台统计（Mock 数字） -->
     <section class="container stats">
       <div class="stat-card">
+        <div class="stat-icon" style="--c: #16a34a"><el-icon><Goods /></el-icon></div>
         <div class="stat-num">{{ stats.productCount }}</div>
         <div class="stat-label">在售商品</div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="--c: #d97706"><el-icon><Coin /></el-icon></div>
         <div class="stat-num">{{ stats.financingSuccess }}</div>
         <div class="stat-label">融资成功（笔）</div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="--c: #0891b2"><el-icon><User /></el-icon></div>
         <div class="stat-num">{{ stats.userCount }}</div>
         <div class="stat-label">注册用户</div>
       </div>
@@ -136,25 +146,90 @@ onMounted(load)
 }
 
 .hero-fallback {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 360px;
+  height: 420px;
   color: #fff;
-  background: linear-gradient(120deg, #16a34a 0%, #0e7a3f 55%, #0b5c31 100%);
+  background: linear-gradient(120deg, #064e3b 0%, #0f7a3d 30%, #16a34a 60%, #34d399 100%);
+  background-size: 300% 300%;
+  animation: hero-gradient 14s ease infinite;
 }
 
 .hero-fallback h1 {
-  margin: 0 0 12px;
-  font-size: 30px;
-  font-weight: 600;
+  position: relative;
+  margin: 0 0 14px;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .hero-fallback p {
+  position: relative;
   margin: 0;
-  font-size: 14px;
-  opacity: 0.9;
+  font-size: 15px;
+  opacity: 0.92;
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.hero-blob-1 {
+  width: 360px;
+  height: 360px;
+  background: rgba(74, 222, 128, 0.55);
+  top: -100px;
+  left: -80px;
+}
+
+.hero-blob-2 {
+  width: 300px;
+  height: 300px;
+  background: rgba(167, 243, 208, 0.45);
+  bottom: -80px;
+  right: -60px;
+}
+
+.hero-blob-3 {
+  width: 200px;
+  height: 200px;
+  background: rgba(254, 240, 138, 0.4);
+  bottom: 60px;
+  left: 32%;
+}
+
+.hero-actions {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.hero-cta {
+  color: #16a34a;
+  background: #fff;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.hero-ghost {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.hero-ghost:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 
 /* ---------- 统计 ---------- */
@@ -166,16 +241,40 @@ onMounted(load)
 }
 
 .stat-card {
+  position: relative;
+  overflow: hidden;
   padding: 24px;
   text-align: center;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(16, 163, 74, 0.1);
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 12px;
+  font-size: 22px;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 14%, #fff);
+  border-radius: 12px;
 }
 
 .stat-num {
-  font-size: 28px;
-  font-weight: 700;
-  color: #16a34a;
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(120deg, #16a34a, #059669);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .stat-label {
