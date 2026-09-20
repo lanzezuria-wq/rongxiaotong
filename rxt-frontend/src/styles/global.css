@@ -39,8 +39,9 @@ body {
   --el-color-primary-dark-2: #15803d;
 }
 
-/* 主按钮换成渐变，比纯色更有质感 */
-.el-button--primary {
+/* 主按钮换成渐变，比纯色更有质感。
+   注意排除 .is-text（文字型按钮）：它没有实底，套上渐变会让绿字叠在绿底上看不清。 */
+.el-button--primary:not(.is-text) {
   background-image: linear-gradient(135deg, #16a34a 0%, #059669 100%);
 }
 
