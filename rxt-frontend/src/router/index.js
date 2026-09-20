@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { isLoggedIn, isAdmin, authState } from '@/utils/auth'
+import { isLoggedIn, isAdmin, isFarmer, isBank, authState } from '@/utils/auth'
 
 /**
  * 路由表 —— 门户（首页/商品浏览）＋ P1 已交付的用户体系与后台管理页面。
@@ -47,6 +47,126 @@ const routes = [
         name: 'product-detail',
         component: () => import('@/views/product/detail.vue'),
         meta: { public: true, title: '商品详情' }
+      },
+
+      // ---------------- 交易（登录后可用）----------------
+      {
+        path: 'cart',
+        name: 'cart',
+        component: () => import('@/views/cart/index.vue'),
+        meta: { title: '购物车' }
+      },
+      {
+        path: 'order/confirm',
+        name: 'order-confirm',
+        component: () => import('@/views/order/confirm.vue'),
+        meta: { title: '确认订单' }
+      },
+      {
+        path: 'buyer/orders',
+        name: 'buyer-orders',
+        component: () => import('@/views/order/buyer.vue'),
+        meta: { title: '我的订单' }
+      },
+
+      // ---------------- 农户专属 ----------------
+      {
+        path: 'farmer/sales',
+        name: 'farmer-sales',
+        component: () => import('@/views/order/farmer.vue'),
+        meta: { title: '我的销售', requiresFarmer: true }
+      },
+      {
+        path: 'farmer/publish',
+        name: 'farmer-publish',
+        component: () => import('@/views/product/publish.vue'),
+        meta: { title: '发布商品', requiresFarmer: true }
+      },
+
+      // ---------------- 专家助力：文章 / 专家（游客可读）----------------
+      {
+        path: 'articles',
+        name: 'article-list',
+        component: () => import('@/views/article/list.vue'),
+        meta: { public: true, title: '知识文章' }
+      },
+      {
+        path: 'articles/:id',
+        name: 'article-detail',
+        component: () => import('@/views/article/detail.vue'),
+        meta: { public: true, title: '文章详情' }
+      },
+      {
+        path: 'experts',
+        name: 'expert-list',
+        component: () => import('@/views/expert/list.vue'),
+        meta: { public: true, title: '农业专家' }
+      },
+      {
+        path: 'experts/:id',
+        name: 'expert-detail',
+        component: () => import('@/views/expert/detail.vue'),
+        meta: { public: true, title: '专家详情' }
+      },
+
+      // ---------------- 融资服务（登录后可用）----------------
+      {
+        path: 'financing/apply',
+        name: 'financing-apply',
+        component: () => import('@/views/financing/apply.vue'),
+        meta: { title: '融资申请' }
+      },
+      {
+        path: 'financing/groups',
+        name: 'financing-groups',
+        component: () => import('@/views/financing/groups.vue'),
+        meta: { title: '联保小组' }
+      },
+      {
+        path: 'financing/group/:id',
+        name: 'financing-group-detail',
+        component: () => import('@/views/financing/group-detail.vue'),
+        meta: { title: '小组详情' }
+      },
+      {
+        path: 'financing/my',
+        name: 'financing-my',
+        component: () => import('@/views/financing/my.vue'),
+        meta: { title: '我的融资' }
+      },
+
+      // ---------------- 提问（登录后可用）----------------
+      {
+        path: 'question/ask',
+        name: 'question-ask',
+        component: () => import('@/views/question/ask.vue'),
+        meta: { title: '在线提问' }
+      },
+      {
+        path: 'question/my',
+        name: 'question-my',
+        component: () => import('@/views/question/my.vue'),
+        meta: { title: '我的提问' }
+      },
+
+      // ---------------- 银行端（仅 bank 角色）----------------
+      {
+        path: 'bank/groups',
+        name: 'bank-groups',
+        component: () => import('@/views/bank/groups.vue'),
+        meta: { title: '联保小组审批', requiresBank: true }
+      },
+      {
+        path: 'bank/approve/:id',
+        name: 'bank-approve',
+        component: () => import('@/views/bank/approve.vue'),
+        meta: { title: '审批', requiresBank: true }
+      },
+      {
+        path: 'bank/stats',
+        name: 'bank-stats',
+        component: () => import('@/views/bank/stats.vue'),
+        meta: { title: '融资统计', requiresBank: true }
       }
     ]
   },
@@ -159,6 +279,22 @@ router.beforeEach((to) => {
   if (to.meta.requiresAdmin || to.matched.some((r) => r.meta?.requiresAdmin)) {
     if (!isAdmin()) {
       ElMessage.error('该页面仅平台管理员可访问')
+      return homePath()
+    }
+  }
+
+  // ---- 需要农户（发布商品 / 我的销售）----
+  if (to.meta.requiresFarmer || to.matched.some((r) => r.meta?.requiresFarmer)) {
+    if (!isFarmer()) {
+      ElMessage.error('该功能仅农户可用')
+      return homePath()
+    }
+  }
+
+  // ---- 需要银行专员（融资审批）----
+  if (to.meta.requiresBank || to.matched.some((r) => r.meta?.requiresBank)) {
+    if (!isBank()) {
+      ElMessage.error('该功能仅银行专员可用')
       return homePath()
     }
   }

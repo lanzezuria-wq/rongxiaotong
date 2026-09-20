@@ -75,6 +75,21 @@ export function isAdmin() {
   return authState.user?.role === 'admin'
 }
 
+/** 是否农户角色。注意：SRS 规定农户与买家共用 farmer 角色，没有独立的 buyer */
+export function isFarmer() {
+  return authState.user?.role === 'farmer'
+}
+
+/** 是否银行专员（银行端融资审批专属） */
+export function isBank() {
+  return authState.user?.role === 'bank'
+}
+
+/** 是否农业专家 */
+export function isExpert() {
+  return authState.user?.role === 'expert'
+}
+
 /** 取当前用户 id（后端大部分接口从 Token 里解，前端只在少数地方需要比对） */
 export function currentUserId() {
   return authState.user?.id ?? null

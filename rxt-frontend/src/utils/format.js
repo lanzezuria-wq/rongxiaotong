@@ -141,3 +141,128 @@ export function formatPrice(value) {
   const n = Number(value)
   return Number.isNaN(n) ? '-' : n.toFixed(2)
 }
+
+// ==================== 订单状态 ====================
+// 后端 OrderConst：0 待付款 / 1 待发货 / 2 已发货 / 3 已完成 / 4 已取消
+
+const ORDER_STATUS = {
+  0: { label: '待付款', tag: 'warning' },
+  1: { label: '待发货', tag: 'primary' },
+  2: { label: '已发货', tag: 'info' },
+  3: { label: '已完成', tag: 'success' },
+  4: { label: '已取消', tag: 'info' }
+}
+
+export function orderStatusLabel(status) {
+  return ORDER_STATUS[status]?.label ?? '未知'
+}
+
+export function orderStatusTagType(status) {
+  return ORDER_STATUS[status]?.tag ?? 'info'
+}
+
+/** 订单页的状态筛选 tabs。'' 表示「全部」 */
+export const ORDER_STATUS_FILTER = [
+  { value: '', label: '全部' },
+  { value: 0, label: '待付款' },
+  { value: 1, label: '待发货' },
+  { value: 2, label: '已发货' },
+  { value: 3, label: '已完成' },
+  { value: 4, label: '已取消' }
+]
+
+// ==================== 融资申请状态 ====================
+// 后端 FinancingConst：0 待匹配 / 1 已匹配 / 2 待银行审批 / 3 已通过 / 4 已拒绝 / 5 已取消
+// 状态中文名后端已在 statusName 里给全，这里只补 el-tag 的颜色
+
+const FINANCING_STATUS = {
+  0: { label: '待匹配', tag: 'info' },
+  1: { label: '已匹配', tag: 'primary' },
+  2: { label: '待银行审批', tag: 'warning' },
+  3: { label: '已通过', tag: 'success' },
+  4: { label: '已拒绝', tag: 'danger' },
+  5: { label: '已取消', tag: 'info' }
+}
+
+export function financingStatusLabel(status) {
+  return FINANCING_STATUS[status]?.label ?? '未知'
+}
+
+export function financingStatusTagType(status) {
+  return FINANCING_STATUS[status]?.tag ?? 'info'
+}
+
+// ==================== 联保小组状态 ====================
+// 后端 FinancingConst：0 招募中 / 1 已匹配 / 2 待银行审批 / 3 已通过 / 4 已拒绝
+
+const GROUP_STATUS = {
+  0: { label: '招募中', tag: 'info' },
+  1: { label: '已匹配', tag: 'primary' },
+  2: { label: '待银行审批', tag: 'warning' },
+  3: { label: '已通过', tag: 'success' },
+  4: { label: '已拒绝', tag: 'danger' }
+}
+
+export function groupStatusLabel(status) {
+  return GROUP_STATUS[status]?.label ?? '未知'
+}
+
+export function groupStatusTagType(status) {
+  return GROUP_STATUS[status]?.tag ?? 'info'
+}
+
+// ==================== 提问状态 ====================
+// 后端 Question：0 待回答 / 1 已回答
+
+export function questionStatusLabel(status) {
+  return status === 1 ? '已回答' : status === 0 ? '待回答' : '未知'
+}
+
+export function questionStatusTagType(status) {
+  return status === 1 ? 'success' : 'warning'
+}
+
+// ==================== 融资字典选项 ====================
+// 与 init.sql 的 t_dict 种子一致（资金用途 / 所属行业 / 贷款期限）。
+// 融资表单下拉框用；值即后端校验的字典编码。
+
+export const FUND_USAGE_OPTIONS = [
+  { value: 'SEED', label: '种子化肥' },
+  { value: 'MACHINE', label: '农机具购置' },
+  { value: 'GREENHOUSE', label: '大棚建设' },
+  { value: 'LAND', label: '土地流转' },
+  { value: 'BREED', label: '畜禽养殖' },
+  { value: 'PROCESS', label: '加工流通' }
+]
+
+export const INDUSTRY_OPTIONS = [
+  { value: 'PLANTING', label: '种植业' },
+  { value: 'BREEDING', label: '养殖业' },
+  { value: 'PROCESSING', label: '农产品加工' },
+  { value: 'SERVICE', label: '农业服务' },
+  { value: 'ECOMMERCE', label: '农村电商' }
+]
+
+export const LOAN_TERM_OPTIONS = [
+  { value: 'M3', label: '3 个月' },
+  { value: 'M6', label: '6 个月' },
+  { value: 'M12', label: '12 个月' },
+  { value: 'M24', label: '24 个月' },
+  { value: 'M36', label: '36 个月' }
+]
+
+function labelOf(options, code) {
+  return options.find((o) => o.value === code)?.label || code || '-'
+}
+
+export function fundUsageLabel(code) {
+  return labelOf(FUND_USAGE_OPTIONS, code)
+}
+
+export function industryLabel(code) {
+  return labelOf(INDUSTRY_OPTIONS, code)
+}
+
+export function loanTermLabel(code) {
+  return labelOf(LOAN_TERM_OPTIONS, code)
+}

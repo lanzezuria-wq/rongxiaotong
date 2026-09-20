@@ -5,8 +5,6 @@ import request from './request'
  *
  * <p>商品浏览对游客开放（GET /api/product/** 在 SecurityConfig 放行），
  * 发布 / 编辑 / 上下架 / 删除要求农户角色。
- * 本阶段（商品浏览链路）只封装浏览用的 list / detail 两个，
- * 其余四个在"农户发布 / 我的商品"阶段再接。
  */
 
 /**
@@ -31,4 +29,15 @@ export function getProduct(id) {
   return request.get(`/product/${id}`)
 }
 
-export default { listProducts, getProduct }
+/**
+ * 发布商品（仅农户）。
+ * @param {object} data
+ *   name 商品名(≤50) / categoryCode 分类编码 / price 单价 / stock 库存 /
+ *   unit 单位(≤10) / description 描述 / images 图片URL数组(1~6) /
+ *   skuList [{ spec, price, stock }] 规格，无规格可不传
+ */
+export function publishProduct(data) {
+  return request.post('/product', data)
+}
+
+export default { listProducts, getProduct, publishProduct }

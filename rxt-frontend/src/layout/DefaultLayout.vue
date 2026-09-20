@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { authState, clearAuth, isLoggedIn, isAdmin } from '@/utils/auth'
+import { authState, clearAuth, isLoggedIn, isAdmin, isFarmer, isBank } from '@/utils/auth'
 import { roleLabel } from '@/utils/format'
 
 /**
@@ -15,9 +15,12 @@ import { roleLabel } from '@/utils/format'
 const route = useRoute()
 const router = useRouter()
 
-/** 商品详情页 /products/:id 也要让「农产品」菜单保持高亮 */
+/** 子路由（详情页等）也要让对应的一级菜单保持高亮 */
 const activeMenu = computed(() => {
   if (route.path.startsWith('/products')) return '/products'
+  if (route.path.startsWith('/articles')) return '/articles'
+  if (route.path.startsWith('/experts')) return '/experts'
+  if (route.path.startsWith('/financing')) return '/financing/my'
   return route.path
 })
 
@@ -47,6 +50,12 @@ async function handleLogout() {
 
 function onCommand(cmd) {
   if (cmd === 'profile') router.push('/user/profile')
+  else if (cmd === 'orders') router.push('/buyer/orders')
+  else if (cmd === 'financing') router.push('/financing/my')
+  else if (cmd === 'questions') router.push('/question/my')
+  else if (cmd === 'bank') router.push('/bank/groups')
+  else if (cmd === 'sales') router.push('/farmer/sales')
+  else if (cmd === 'publish') router.push('/farmer/publish')
   else if (cmd === 'admin') router.push('/admin/users')
   else if (cmd === 'logout') handleLogout()
 }
@@ -64,9 +73,16 @@ function onCommand(cmd) {
       <el-menu :default-active="activeMenu" mode="horizontal" class="nav-menu" router :ellipsis="false">
         <el-menu-item index="/">首页</el-menu-item>
         <el-menu-item index="/products">农产品</el-menu-item>
+        <el-menu-item index="/articles">文章</el-menu-item>
+        <el-menu-item index="/experts">专家</el-menu-item>
+        <el-menu-item index="/financing/my">融资服务</el-menu-item>
       </el-menu>
 
       <div class="nav-right">
+        <el-button text class="cart-btn" title="购物车" @click="router.push('/cart')">
+          <el-icon :size="20"><ShoppingCart /></el-icon>
+        </el-button>
+
         <template v-if="isLoggedIn()">
           <el-dropdown @command="onCommand">
             <span class="user-chip">
@@ -78,6 +94,12 @@ function onCommand(cmd) {
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                <el-dropdown-item command="orders">我的订单</el-dropdown-item>
+                <el-dropdown-item command="financing">我的融资</el-dropdown-item>
+                <el-dropdown-item command="questions">我的提问</el-dropdown-item>
+                <el-dropdown-item v-if="isFarmer()" command="sales">我的销售</el-dropdown-item>
+                <el-dropdown-item v-if="isFarmer()" command="publish">发布商品</el-dropdown-item>
+                <el-dropdown-item v-if="isBank()" command="bank">银行审批</el-dropdown-item>
                 <el-dropdown-item v-if="isAdmin()" command="admin">后台管理</el-dropdown-item>
                 <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
               </el-dropdown-menu>
@@ -151,6 +173,10 @@ function onCommand(cmd) {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.cart-btn {
+  padding: 8px;
 }
 
 .user-chip {
