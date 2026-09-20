@@ -255,24 +255,26 @@ onMounted(fetchList)
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="190" fixed="right" align="center">
+        <el-table-column label="操作" width="240" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button size="small" text type="primary" @click="openPreview(row)">
-              查看正文
-            </el-button>
-
-            <template v-if="row.status === 0">
-              <el-button size="small" type="success" plain @click="openAudit(row, AUDIT_APPROVED)">
-                通过
+            <div class="op-actions">
+              <el-button size="small" text type="primary" @click="openPreview(row)">
+                查看正文
               </el-button>
-              <el-button size="small" type="danger" plain @click="openAudit(row, AUDIT_REJECTED)">
-                拒绝
-              </el-button>
-            </template>
 
-            <el-tag v-else size="small" type="info" effect="plain" style="margin-left: 4px">
-              已处理
-            </el-tag>
+              <template v-if="row.status === 0">
+                <el-button size="small" type="success" plain @click="openAudit(row, AUDIT_APPROVED)">
+                  通过
+                </el-button>
+                <el-button size="small" type="danger" plain @click="openAudit(row, AUDIT_REJECTED)">
+                  拒绝
+                </el-button>
+              </template>
+
+              <el-tag v-else size="small" type="info" effect="plain">
+                已处理
+              </el-tag>
+            </div>
           </template>
         </el-table-column>
 
@@ -409,6 +411,18 @@ onMounted(fetchList)
 </template>
 
 <style scoped>
+.op-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.op-actions .el-button + .el-button {
+  margin-left: 0;
+}
+
 .title-link {
   font-size: 14px;
   font-weight: 500;
