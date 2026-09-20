@@ -45,6 +45,23 @@ public class Expert {
     private String intro;
     /** 资质证明文件地址 */
     private String certUrl;
+
+    /**
+     * 评分 0.00~5.00（P3 补列，见 init_p3.sql）。
+     *
+     * <p>初始给 5.00 而不是 0：新专家还没被评价过时，按评分排序会永远沉在最后，
+     * 等于被隐藏。给满分是"中性偏好"的处理，等真有评价数据后再由评价流程覆盖。
+     */
+    private java.math.BigDecimal rating;
+
+    /**
+     * 已回答问题数（P3 补列）。
+     *
+     * <p>专家列表页要显示"已回答 N 个问题" —— 这是农户判断专家是否活跃的主要依据，
+     * 比职称更直观。由 {@code com.rxt.assist.service.impl.ConsultServiceImpl#answer} 在回答时 +1。
+     */
+    private Integer answerCount;
+
     /** 审核意见 */
     private String auditRemark;
     /** 审核人 t_user.id */

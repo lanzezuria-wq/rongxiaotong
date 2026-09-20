@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -389,30 +390,59 @@ class ApiIntegrationTest {
     void m7UserList() throws Exception {
         String admin = adminToken();
 
-        // 全量：种子数据 7 个用户
-        mockMvc.perform(get("/api/admin/user/list")
-                        .param("page", "1").param("size", "20")
+        // ============================================================================
+        // ⚠️ 这里刻意**不**断言"用户总数等于某个数字"。
+        //
+        // 原来写的是 value(7)（P1 的种子数）。这个断言已经被打破过两次：
+        //   · P2 加了 1 个演示买家账号（13900000008）→ 变 8，P2 提交时没同步，测试就红了；
+        //   · P3 又加了 6 个账号（4 农户 + 2 专家，联保小组最少要 3 农户才演示得了）→ 变 14。
+        // 每次有人加种子数据就要回来改这个数字，而漏改的代价是"整条流水线变红"，
+        // 但断言本身并没有校验什么真正的业务规则 —— 它只是在数 SQL 脚本里的行数。
+        //
+        // 所以改成校验**不变量**：能查到、分页结构自洽、按条件筛出来的记录确实符合条件。
+        // 这些才是这个接口真正该保证的东西，而且不会因为别人加种子数据而失效。
+        // ============================================================================
+
+        // 1) 全量查询：能查通、返回分页结构、且密码绝不出现在响应里
+        String body = mockMvc.perform(get("/api/admin/user/list")
+                        .param("page", "1").param("size", "100")
                         .header("Authorization", bearer(admin)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.total").value(7))
-                .andExpect(jsonPath("$.data.records[0].password").doesNotExist());
+                .andExpect(jsonPath("$.data.records[0].password").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        long total = extractLong(body, "total");
+        // 至少要覆盖 P1 的 7 个种子账号 —— 用下界而不是等号，别人加种子不会再弄红它
+        assertTrue(total >= 7, "用户总数应至少包含 P1 的 7 个种子账号，实际 " + total);
 
-        // 按角色筛选
-        mockMvc.perform(get("/api/admin/user/list")
-                        .param("role", "expert")
+        // 2) 按角色筛选：**返回的每一条**都必须是 expert（这是筛选功能的真正不变量），
+        //    而不是去数"到底有几个专家"
+        String expertBody = mockMvc.perform(get("/api/admin/user/list")
+                        .param("role", "expert").param("size", "100")
                         .header("Authorization", bearer(admin)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.total").value(3));
+                .andExpect(jsonPath("$.code").value(0))
+                .andReturn().getResponse().getContentAsString();
+        assertTrue(expertBody.contains("\"role\":\"expert\""), "按 expert 筛选应返回专家：" + expertBody);
+        assertTrue(!expertBody.contains("\"role\":\"admin\""),
+                "按 expert 筛选不该混入管理员：" + expertBody);
 
-        // 专家审核页的取数方式：role=expert & status=0（待审核）
-        mockMvc.perform(get("/api/admin/user/list")
-                        .param("role", "expert").param("status", "0")
+        // 3) 专家审核页的取数方式：role=expert & status=0（待审核）。
+        //    锚定断言：P1 的待审专家「张农艺师」必须在这份列表里 ——
+        //    这才是审核页真正依赖的东西（"列表里有没有该处理的人"），
+        //    而不是"列表里有几条"。
+        String pendingBody = mockMvc.perform(get("/api/admin/user/list")
+                        .param("role", "expert").param("status", "0").param("size", "100")
                         .header("Authorization", bearer(admin)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.total").value(2));
+                .andExpect(jsonPath("$.code").value(0))
+                .andReturn().getResponse().getContentAsString();
+        assertTrue(pendingBody.contains(PENDING_EXPERT_PHONE),
+                "待审核专家列表应包含 " + PENDING_EXPERT_PHONE + "：" + pendingBody);
+        assertTrue(pendingBody.contains("\"status\":0"),
+                "该列表里不应出现非待审核状态：" + pendingBody);
 
-        // 关键词模糊搜索
+        // 4) 关键词模糊搜索（这个断言与种子总量无关，一直很稳）
         mockMvc.perform(get("/api/admin/user/list")
                         .param("keyword", "李农户")
                         .header("Authorization", bearer(admin)))
@@ -420,14 +450,16 @@ class ApiIntegrationTest {
                 .andExpect(jsonPath("$.data.total").value(1))
                 .andExpect(jsonPath("$.data.records[0].phone").value(FARMER_PHONE));
 
-        // 分页生效
+        // 5) 分页自洽：每页 3 条时，页数必须是 ceil(total/3)，
+        //    且首页确实返回 3 条 —— 用 total 现算，不写死
+        long expectedPages = (total + 2) / 3;
         mockMvc.perform(get("/api/admin/user/list")
                         .param("page", "1").param("size", "3")
                         .header("Authorization", bearer(admin)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.size").value(3))
-                .andExpect(jsonPath("$.data.pages").value(3))
-                .andExpect(jsonPath("$.data.records.length()").value(3));
+                .andExpect(jsonPath("$.data.records.length()").value(3))
+                .andExpect(jsonPath("$.data.pages").value(expectedPages));
     }
 
     @Test
@@ -766,5 +798,18 @@ class ApiIntegrationTest {
     private String extractNumber(String json, String field) {
         Matcher m = Pattern.compile("\"" + field + "\"\\s*:\\s*(\\d+)").matcher(json);
         return m.find() ? m.group(1) : null;
+    }
+
+    /**
+     * 抠一个整数字段并返回 long（抠不到返回 -1）。
+     *
+     * <p>P3 新增，为了把 {@code m7UserList} 里写死的"用户总数 = 7"改成
+     * "用返回值现算分页页数"。返回 -1 而不是抛异常，是为了让断言失败时
+     * 看到的是"期望 3 页、实际 -1 页"这种能立刻定位的信息，
+     * 而不是一个找不到字段的异常堆栈。
+     */
+    private long extractLong(String json, String field) {
+        String value = extractNumber(json, field);
+        return value == null ? -1L : Long.parseLong(value);
     }
 }

@@ -96,6 +96,35 @@ public class SecurityConfig {
                         // 文章列表 / 详情：SRS 表58 标注认证为"×"，游客可读
                         .requestMatchers(HttpMethod.GET, "/api/article/**").permitAll()
 
+                        // ============ P3 融资模块（M4 融资服务 + M6 银行端 + M5 专家助力） ============
+
+                        // M6 银行端：审批是银行专属职能，别的角色一律进不来。
+                        // ⚠️ 这条只按角色拦，判断不了"这个小组归不归你审批"——那属于业务规则，
+                        //    在 BankServiceImpl.approve 里（要读小组数据才能判断）。
+                        //    另外它和 BankController 上的 @PreAuthorize("hasRole('bank')")
+                        //    以及 Service 里的 requireBankUser 是三层冗余，挡的不是同一件事
+                        //    （详见 BankController 的类注释）。
+                        .requestMatchers("/api/bank/**").hasRole("bank")
+
+                        // M5 专家列表与详情：SRS 表58 里这两个接口认证为"×"，
+                        // 游客在登录前应该能看到"平台上有哪些专家"，这是产品获客路径的一部分。
+                        .requestMatchers(HttpMethod.GET, "/api/expert/**").permitAll()
+
+                        // M4 融资服务（/api/financing/**）与 M5 的提问、预约
+                        // （/api/question/**、/api/appointment/**）都由下面的
+                        // anyRequest().authenticated() 兜住"登录即可访问"，这里不重复声明。
+                        //
+                        // 为什么它们的角色要求不写在这里？因为那是**"按动作"而不是"按路径"**的：
+                        //   · 融资申请 / 发起小组   → 只有农户（FinancingServiceImpl 校验）
+                        //   · 融资申请详情         → 本人 + admin/bank（FinancingServiceImpl 校验）
+                        //   · 加入小组用的申请归属 → 必须是自己的申请（FinancingServiceImpl 校验）
+                        //   · 专家回答 / 处理预约  → 必须是"记录归属的那个专家"
+                        //     （ConsultServiceImpl 校验）—— 这个 URL 规则根本表达不了，
+                        //     它要判断"你的 t_expert.id 是不是这条记录的 expertId"。
+                        // 硬要写成多条互相穿插的 URL 规则，只会既难读又容易漏。
+
+                        // ==================== P3 新增结束 ====================
+
                         // 除以上之外的所有接口，登录即可访问
                         .anyRequest().authenticated())
 

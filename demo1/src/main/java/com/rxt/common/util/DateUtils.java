@@ -40,4 +40,50 @@ public final class DateUtils {
     public static String format(LocalDateTime dateTime) {
         return dateTime == null ? null : DATE_TIME_FORMATTER.format(dateTime);
     }
+
+    /**
+     * 把前端传来的时间字符串解析成 {@code LocalDateTime}，null / 空串返回 null。
+     *
+     * <p>P3 新增（M5 专家预约的 {@code appointmentTime} 需要）。
+     *
+     * <p><b>为什么要容忍两种格式？</b>因为不能假设前端用哪个组件：
+     * <ul>
+     *   <li>Element Plus 的 {@code el-date-picker} 配了
+     *       {@code value-format="YYYY-MM-DD HH:mm:ss"} 时输出 {@code "2026-09-25 09:30:00"}；</li>
+     *   <li>不配 {@code value-format} 时它输出 ISO 串 {@code "2026-09-25T09:30:00.000Z"}。</li>
+     * </ul>
+     * 只认第一种的话，第二种会在解析处炸掉，而报错信息（{@code DateTimeParseException}）
+     * 对前端同学毫无帮助。这里统一兼容：先把 {@code T} 换成空格、丢掉毫秒和时区后缀，
+     * 再按项目格式解析。
+     *
+     * <p>解析失败抛 {@link IllegalArgumentException}（而不是 DateTimeParseException），
+     * 由调用方包成 {@code BizException(1001, "预约时间格式不正确…")}，
+     * 这样用户看到的是可执行的提示而不是 500。
+     */
+    public static LocalDateTime parse(String text) {
+        if (text == null || text.isBlank()) {
+            return null;
+        }
+        String normalized = text.trim().replace('T', ' ');
+        // 丢掉毫秒（.000）
+        int dot = normalized.indexOf('.');
+        if (dot > 0) {
+            normalized = normalized.substring(0, dot);
+        }
+        // 丢掉 Z 后缀
+        int zone = normalized.indexOf('Z');
+        if (zone > 0) {
+            normalized = normalized.substring(0, zone);
+        }
+        // 丢掉 +08:00 / -05:00 这类时区偏移（前 19 位是 "yyyy-MM-dd HH:mm:ss"）
+        if (normalized.length() > DATE_TIME_PATTERN.length()
+                && (normalized.charAt(19) == '+' || normalized.charAt(19) == '-')) {
+            normalized = normalized.substring(0, 19);
+        }
+        try {
+            return LocalDateTime.parse(normalized, DATE_TIME_FORMATTER);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("时间格式不正确，应形如 2026-09-25 09:30:00");
+        }
+    }
 }

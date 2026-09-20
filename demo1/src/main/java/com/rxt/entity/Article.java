@@ -59,6 +59,23 @@ public class Article {
 
     private Integer viewCount;
 
+    /**
+     * 点赞数（P3 补列，见 init_p3.sql 里的 {@code rxt_add_column_if_absent}）。
+     *
+     * <p>冗余计数：可以由 {@code COUNT(t_article_like)} 算出来，但仍然存一份。
+     * 因为文章列表页每行都要显示点赞数，10 行就是 10 次 count 子查询；
+     * 而计数只需要在点赞/取消的那一刻同步 ±1。
+     * <b>同步逻辑集中在 {@code com.rxt.assist.service.impl.ArticleServiceImpl#toggleLike}，
+     * 别处不许直接改这一列。</b>
+     */
+    private Integer likeCount;
+
+    /**
+     * 评论数（P3 补列）。同样是为了列表页免去 count 查询，
+     * 由 {@code ArticleServiceImpl#comment} 在插入评论时 +1。
+     */
+    private Integer commentCount;
+
     /** 逻辑删除，与 t_user 一致 */
     private Integer deleted;
 

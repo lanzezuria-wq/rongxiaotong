@@ -52,4 +52,52 @@ public final class SecurityUtils {
     public static boolean isAdmin() {
         return "admin".equals(currentUser().getRole());
     }
+
+    // ==================================================================================
+    // 对"游客也能访问"的接口提供的不抛异常版本（P3 新增）
+    // ==================================================================================
+
+    /**
+     * 取当前登录用户 id，<b>未登录时返回 null 而不是抛异常</b>。
+     *
+     * <p><b>为什么必须有这一对方法？</b>因为项目里有几个接口是
+     * {@code permitAll}、但对已登录用户会返回更多内容的（P3 新增了
+     * {@code GET /api/article/{id}} 和 {@code GET /api/expert/{id}}）：
+     * <ul>
+     *   <li>文章详情里 {@code isLiked} 要按当前用户算，游客恒为 0；</li>
+     *   <li>未发布的文章，作者本人能看到、游客看不到 —— 要判断"你是不是作者"。</li>
+     * </ul>
+     * 这类接口如果直接调 {@link #currentUserId()}，游客一访问就会抛
+     * "未登录或登录状态无效" —— 明明这个接口是对游客开放的，却报登录错误，
+     * 表现非常费解。所以专门提供"可能为 null"的版本，由调用方显式处理游客分支。
+     *
+     * <p><b>取名用 {@code OrNull} 而不是重载 {@code currentUserId()}：</b>
+     * 重载会让"到底调的是哪个"难以一眼看出（两个方法只差返回类型），
+     * 而这两个方法的行为差异（抛异常 vs 返回 null）恰恰是调用方必须意识到的。
+     * 显式的名字能让 review 的人立刻看到"这里考虑了未登录的情况"。
+     */
+    public static Long currentUserIdOrNull() {
+        LoginUser loginUser = currentUserOrNull();
+        return loginUser == null ? null : loginUser.getUserId();
+    }
+
+    /** 取当前登录用户角色，未登录时返回 null。用途见 {@link #currentUserIdOrNull()} */
+    public static String currentRoleOrNull() {
+        LoginUser loginUser = currentUserOrNull();
+        return loginUser == null ? null : loginUser.getRole();
+    }
+
+    /**
+     * 取当前登录用户，未登录/匿名时返回 null。
+     *
+     * <p>判断逻辑和 {@link #currentUser()} 完全一样，差别只在"没登录"时
+     * 一个抛异常、一个返回 null。
+     */
+    public static LoginUser currentUserOrNull() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof LoginUser loginUser)) {
+            return null;
+        }
+        return loginUser;
+    }
 }
