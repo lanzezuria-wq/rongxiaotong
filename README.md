@@ -254,9 +254,12 @@ git pull --rebase origin master   # 先拉，避免推送被拒
 git push origin master
 ```
 
-推送时会要求输入 CodeHub 的 HTTPS 凭据（账号 `pgx1181`）；
-若提示认证失败，去仓库页「设置 → HTTPS 密码」生成一个令牌代替账号密码。
-**不要把密码写进 `.git/config` 的 remote URL。**
+推送需要 CodeHub 的凭据。**本机凭据已保存在 Windows 凭据管理器里，直接 push 即可。**
 
-> 完整版（含冲突处理、撤销、自查命令）见
+> ⚠️ 实测：**华为云账号密码不能用于 git 推送**（会返回 `HTTP Basic: Access denied`）。
+> 必须用仓库级的 **HTTPS 密码**：CodeHub 仓库页 →「设置」→「HTTPS 密码」→ 生成。
+> 提示输入时 Username 填 `pgx1181`，Password 填那串 HTTPS 密码。
+> **不要把密码写进 `.git/config` 的 remote URL。**
+
+> 完整版（含凭据处理、冲突处理、撤销、自查命令）见
 > [`docs/项目交付总文档.md` 第六章](docs/项目交付总文档.md)。
