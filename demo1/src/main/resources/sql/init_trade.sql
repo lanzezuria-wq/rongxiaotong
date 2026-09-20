@@ -217,7 +217,53 @@ VALUES
 
   (@farmer_id, '东北非转基因大豆 50kg', 'GRAIN', 220.00, 50, '袋',
    '黑龙江非转基因黄豆，颗粒均匀，适合做豆腐和榨油。', '["https://picsum.photos/seed/soybean/600/400"]',
-   NULL, 95, 11, 1);
+   NULL, 95, 11, 1),
+
+  (@farmer_id, '新疆库尔勒香梨 10斤', 'FRUIT', 59.90, 150, '箱',
+   '库尔勒核心产区直发，皮薄肉细、汁多味甜，冷藏后口感更佳。', '["https://picsum.photos/seed/pear/600/400"]',
+   '[{"spec":"10斤/箱","price":59.90,"stock":150},{"spec":"5斤/箱","price":32.00,"stock":200}]',
+   245, 57, 1),
+
+  (@farmer_id, '云南高山娃娃菜 5斤', 'VEG', 15.80, 200, '斤',
+   '高原昼夜温差大，口感清甜脆嫩，适合上汤、清炒。', '["https://picsum.photos/seed/babycabbage/600/400"]',
+   NULL, 132, 74, 1),
+
+  (@farmer_id, '内蒙古羔羊肉 3斤', 'LIVESTOCK', 128.00, 60, '斤',
+   '草原散养羔羊，肉质细嫩无膻味，顺丰冷链锁鲜。', '["https://picsum.photos/seed/lamb/600/400"]',
+   '[{"spec":"3斤/份","price":128.00,"stock":60}]',
+   198, 36, 1),
+
+  (@farmer_id, '舟山带鱼 5斤', 'AQUATIC', 98.00, 80, '斤',
+   '东海舟山渔场直供，肉质肥厚，红烧清蒸皆宜。', '["https://picsum.photos/seed/hairtail/600/400"]',
+   NULL, 156, 48, 1),
+
+  (@farmer_id, '宁夏中宁枸杞 1kg', 'CASH', 68.00, 120, '袋',
+   '中宁核心产区，颗粒饱满，可直接泡水或入汤。', '["https://picsum.photos/seed/goji/600/400"]',
+   '[{"spec":"1kg/袋","price":68.00,"stock":120},{"spec":"500g/袋","price":36.00,"stock":180}]',
+   289, 92, 1),
+
+  (@farmer_id, '山西沁州黄小米 10斤', 'GRAIN', 49.90, 180, '袋',
+   '沁州黄小米，米油厚、易熬出米油，养胃好选择。', '["https://picsum.photos/seed/millet/600/400"]',
+   '[{"spec":"10斤/袋","price":49.90,"stock":180},{"spec":"5斤/袋","price":26.00,"stock":240}]',
+   214, 68, 1),
+
+  (@farmer_id, '海南贵妃芒 8斤', 'FRUIT', 39.90, 160, '箱',
+   '三亚直发，皮薄核小、香甜多汁，树上熟采摘。', '["https://picsum.photos/seed/mango/600/400"]',
+   NULL, 176, 81, 1),
+
+  (@farmer_id, '温县铁棍山药 10斤', 'VEG', 42.00, 140, '箱',
+   '垆土铁棍山药，粉糯绵密，炖汤蒸食皆宜。', '["https://picsum.photos/seed/yam/600/400"]',
+   NULL, 167, 55, 1),
+
+  (@farmer_id, '林下散养土鸡 1只', 'LIVESTOCK', 88.00, 90, '只',
+   '林地散养 180 天以上，现杀现发，煲汤鲜美。', '["https://picsum.photos/seed/chicken/600/400"]',
+   '[{"spec":"1只（约2.5斤）","price":88.00,"stock":90}]',
+   203, 43, 1),
+
+  (@farmer_id, '阳澄湖大闸蟹 6只装', 'AQUATIC', 228.00, 45, '盒',
+   '阳澄湖湖区养殖，公母各半，顺丰包活到家。', '["https://picsum.photos/seed/crab2/600/400"]',
+   '[{"spec":"6只/盒（公3母3）","price":228.00,"stock":45}]',
+   312, 29, 1);
 
 -- 收货地址：买家一个默认地址，卖家一个
 INSERT INTO t_address (user_id, receiver, phone, province, city, district, detail, is_default)

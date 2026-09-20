@@ -237,3 +237,46 @@ SELECT '设施蔬菜连作障碍的成因与对策', 'VEG',
        '设施蔬菜,连作障碍,土壤', u.id, 'expert', 1, '内容专业，予以发布',
        (SELECT id FROM t_user WHERE phone = '13900000000' LIMIT 1), NOW(), 128
 FROM t_user u WHERE u.phone = '13900000006';
+
+-- 追加已发布文章（让文章列表页有内容可看）
+INSERT INTO t_article (title, category, content, tags, author_id, author_role, status, audit_remark, audit_by, audit_time, view_count)
+SELECT '小麦赤霉病综合防治技术', 'planting',
+       '赤霉病重在预防。抽穗扬花期是防治关键窗口，遇连阴雨要抢晴喷药。推荐戊唑醇·咪鲜胺复配，注意轮换用药，延缓抗性。',
+       '小麦,病害,防治', u.id, 'expert', 1, '内容专业，予以发布',
+       (SELECT id FROM t_user WHERE phone = '13900000000' LIMIT 1), NOW(), 256
+FROM t_user u WHERE u.phone = '13900000006';
+
+INSERT INTO t_article (title, category, content, tags, author_id, author_role, status, audit_remark, audit_by, audit_time, view_count)
+SELECT '生猪养殖的常见误区与科学防疫', 'breeding',
+       '很多散养户重治疗轻预防，疫苗该打不打、消毒流于形式。科学防疫要做到：程序化免疫、定期驱虫、圈舍勤消毒，发现异常早隔离早处理。',
+       '生猪,防疫,养殖', u.id, 'expert', 1, '内容专业，予以发布',
+       (SELECT id FROM t_user WHERE phone = '13900000000' LIMIT 1), NOW(), 198
+FROM t_user u WHERE u.phone = '13900000006';
+
+INSERT INTO t_article (title, category, content, tags, author_id, author_role, status, audit_remark, audit_by, audit_time, view_count)
+SELECT '农产品品牌化运营：从产地到餐桌', 'market',
+       '农产品同质化严重，品牌是溢价的唯一出路。可以从三件事做起：统一品控标准、讲好产地故事、建立可追溯体系，让消费者买得放心。',
+       '品牌,电商,运营', u.id, 'expert', 1, '内容专业，予以发布',
+       (SELECT id FROM t_user WHERE phone = '13900000000' LIMIT 1), NOW(), 342
+FROM t_user u WHERE u.phone = '13900000006';
+
+INSERT INTO t_article (title, category, content, tags, author_id, author_role, status, audit_remark, audit_by, audit_time, view_count)
+SELECT '水稻主要病虫害绿色防控方案', 'planting',
+       '绿色防控不是不打药，而是少打药、打对药。推广抗病品种、性诱剂诱杀、天敌保育和科学用药相结合，可减少农药用量 30% 以上。',
+       '水稻,病虫害,绿色防控', u.id, 'expert', 1, '内容专业，予以发布',
+       (SELECT id FROM t_user WHERE phone = '13900000000' LIMIT 1), NOW(), 175
+FROM t_user u WHERE u.phone = '13900000006';
+
+INSERT INTO t_article (title, category, content, tags, author_id, author_role, status, audit_remark, audit_by, audit_time, view_count)
+SELECT '果园水肥一体化技术要点', 'planting',
+       '水肥一体化是把水和肥精准送到根系，省工省肥又增产。核心是选对滴灌设备、根据生育期制定施肥方案，并定期冲洗防止堵塞。',
+       '果树,水肥,滴灌', u.id, 'expert', 1, '内容专业，予以发布',
+       (SELECT id FROM t_user WHERE phone = '13900000000' LIMIT 1), NOW(), 221
+FROM t_user u WHERE u.phone = '13900000006';
+
+INSERT INTO t_article (title, category, content, tags, author_id, author_role, status, audit_remark, audit_by, audit_time, view_count)
+SELECT '家庭农场的经营账本该怎么算', 'policy',
+       '家庭农场要算清两本账：现金账和成本账。很多农场主只看收入不看折旧，年底才发现白忙一场。建议每月盘点，把人工、折旧、利息都摊进成本。',
+       '家庭农场,经营,成本', u.id, 'expert', 1, '内容专业，予以发布',
+       (SELECT id FROM t_user WHERE phone = '13900000000' LIMIT 1), NOW(), 143
+FROM t_user u WHERE u.phone = '13900000006';

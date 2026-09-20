@@ -492,14 +492,64 @@ JOIN t_user eu ON eu.id = e.user_id
 WHERE u.phone = '13900000013' AND eu.phone = '13900000015';
 
 
+-- ---- 追加 2 个专家 + 3 条提问（让专家列表、提问页更丰富） ----
+INSERT IGNORE INTO t_user (phone, password, name, role, status, email, province, city, extend_json) VALUES
+('13900000017', '$2a$10$DkHWviYNMEyP0hAXGFFkruu6F7wnvYyU1UWlxE4AfGhvC1mVgcQlu', '郑国平', 'expert', 1, 'expert6@rxt.com', '广东省', '广州市',
+ '{"title":"教授","org":"华南农业大学园艺学院","domain":"果树栽培与育种","intro":"长期从事南方果树栽培与品种选育研究","certUrl":null}'),
+('13900000018', '$2a$10$DkHWviYNMEyP0hAXGFFkruu6F7wnvYyU1UWlxE4AfGhvC1mVgcQlu', '吴志远', 'expert', 1, 'expert7@rxt.com', '北京市', '北京市',
+ '{"title":"高级工程师","org":"中国农业科学院","domain":"智慧农业与农业物联网","intro":"从事农业信息化与智能装备研发 15 年","certUrl":null}');
+
+INSERT IGNORE INTO t_expert (user_id, real_name, title, org, domain, intro, rating, answer_count, audit_remark, audit_by, audit_time)
+SELECT id, '郑国平', '教授', '华南农业大学园艺学院', '果树栽培与育种',
+       '长期从事南方果树栽培与品种选育研究', 4.70, 0,
+       '资质齐备，予以通过', (SELECT id FROM t_user WHERE phone = '13900000000' LIMIT 1), NOW()
+FROM t_user WHERE phone = '13900000017';
+
+INSERT IGNORE INTO t_expert (user_id, real_name, title, org, domain, intro, rating, answer_count, audit_remark, audit_by, audit_time)
+SELECT id, '吴志远', '高级工程师', '中国农业科学院', '智慧农业与农业物联网',
+       '从事农业信息化与智能装备研发 15 年', 4.50, 0,
+       '资质齐备，予以通过', (SELECT id FROM t_user WHERE phone = '13900000000' LIMIT 1), NOW()
+FROM t_user WHERE phone = '13900000018';
+
+INSERT INTO t_question (user_id, expert_id, title, content, status)
+SELECT u.id, NULL, '大棚湿度总是偏高，蔬菜容易烂根怎么办？',
+       '冬季大棚通风少，湿度经常在 90% 以上，番茄灰霉病反复发作，有什么控湿的好办法？',
+       0
+FROM t_user u WHERE u.phone = '13900000014';
+
+INSERT INTO t_question (user_id, expert_id, title, content, answer, answer_by, status, answered_at)
+SELECT u.id, e.id, '南方柑橘冬季修剪有什么注意事项？',
+       '家里的砂糖橘树龄有 8 年了，树形比较乱，想问下冬季修剪要注意哪些要点？',
+       '冬季修剪以疏除交叉枝、病虫枝和过密枝为主，注意开天窗、留足内膛光照；剪口要平、粗枝涂愈合剂，避免感染。',
+       e.id, 1, NOW() - INTERVAL 5 DAY
+FROM t_user u, t_expert e
+JOIN t_user eu ON eu.id = e.user_id
+WHERE u.phone = '13900000013' AND eu.phone = '13900000017';
+
+INSERT INTO t_question (user_id, expert_id, title, content, answer, answer_by, status, answered_at)
+SELECT u.id, e.id, '想给自家果园上物联网监测，投入大概多少？',
+       '有 30 亩果园，想装土壤墒情和气象监测设备，请问投入成本和实用性怎么样？',
+       '小规模果园建议从最关键的墒情监测做起，一套基础设备几千元即可落地；先解决灌溉决策这个最大痛点，再逐步扩展到气象和虫情监测。',
+       e.id, 1, NOW() - INTERVAL 3 DAY
+FROM t_user u, t_expert e
+JOIN t_user eu ON eu.id = e.user_id
+WHERE u.phone = '13900000012' AND eu.phone = '13900000018';
+
+-- 写死 answer_count，保证重复执行不累加
+UPDATE t_expert SET answer_count = 1
+WHERE user_id = (SELECT id FROM t_user WHERE phone = '13900000017' LIMIT 1);
+
+UPDATE t_expert SET answer_count = 1
+WHERE user_id = (SELECT id FROM t_user WHERE phone = '13900000018' LIMIT 1);
+
 -- =============================================================================
 -- 自检（执行完可以跑这几条核对，数字是实测值）
 --   SELECT COUNT(*) FROM t_financing_apply;   -- 4（3 条挂在演示小组 + 1 条待匹配）
 --   SELECT COUNT(*) FROM t_guarantee_group;   -- 1
 --   SELECT COUNT(*) FROM t_guarantee_member;  -- 3
 --   SELECT COUNT(*) FROM t_bank_approval;     -- 0（审批是运行时动作，不预置）
---   SELECT COUNT(*) FROM t_expert;            -- 3（P1 赵教授 + P3 钱牧之/周文博）
---   SELECT COUNT(*) FROM t_question;          -- 2（1 待回答 + 1 已回答）
+--   SELECT COUNT(*) FROM t_expert;            -- 5（P1 赵教授 + P3 钱牧之/周文博/郑国平/吴志远）
+--   SELECT COUNT(*) FROM t_question;          -- 5（2 待回答 + 3 已回答）
 --   SELECT COUNT(*) FROM t_appointment;       -- 1
 --
 --   -- 不变量自检：小组的 totalAmount 必须等于成员申请金额之和
