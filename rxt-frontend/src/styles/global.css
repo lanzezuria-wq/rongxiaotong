@@ -30,6 +30,13 @@ body {
   padding: 20px;
 }
 
+/** 门户（首页/商品列表/详情）内容的最大宽度容器 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
 /** 每个页面顶部的「标题 + 说明 + 操作按钮」条 */
 .page-header {
   display: flex;

@@ -114,3 +114,30 @@ export const DICT_TYPE_OPTIONS = [
 export function dictTypeLabel(type) {
   return DICT_TYPE_OPTIONS.find((o) => o.value === type)?.label || type || '-'
 }
+
+// ==================== 商品分类 ====================
+// 后端 DictConst.ORDERED_TYPES 里的 product_category，6 个分类取值来自 init.sql。
+// 商品列表的分类筛选对游客也开放，而字典接口 /admin/dict/** 要求登录，
+// 所以这里写死一份兜底，游客不用登录也能筛。
+
+export const PRODUCT_CATEGORY_OPTIONS = [
+  { value: 'GRAIN', label: '粮食作物' },
+  { value: 'VEG', label: '蔬菜' },
+  { value: 'FRUIT', label: '水果' },
+  { value: 'LIVESTOCK', label: '畜禽' },
+  { value: 'AQUATIC', label: '水产' },
+  { value: 'CASH', label: '经济作物' }
+]
+
+export function productCategoryLabel(code) {
+  return PRODUCT_CATEGORY_OPTIONS.find((o) => o.value === code)?.label || code || '-'
+}
+
+// ==================== 金额 ====================
+// 后端金额是 BigDecimal，Jackson 序列化成 JSON 数字后到 JS 变成 number，
+// 会丢掉末尾的 0（168.00 → 168）。展示统一用 toFixed(2) 补齐两位小数。
+
+export function formatPrice(value) {
+  const n = Number(value)
+  return Number.isNaN(n) ? '-' : n.toFixed(2)
+}

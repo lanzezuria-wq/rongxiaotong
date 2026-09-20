@@ -3,13 +3,14 @@ import { ElMessage } from 'element-plus'
 import { isLoggedIn, isAdmin, authState } from '@/utils/auth'
 
 /**
- * 路由表 —— P1 的前端交付范围共 8 个页面（含修改密码）。
+ * 路由表 —— 门户（首页/商品浏览）＋ P1 已交付的用户体系与后台管理页面。
  *
- * <p>结构上用「嵌套路由」表达两种外壳：
+ * <p>结构上用「嵌套路由」表达三种外壳：
  * <pre>
  *   /login  /register            ← 独立整屏页，无导航
- *   /user/*   → UserLayout   ← 顶部导航（个人中心、修改密码）
- *   /admin/*  → AdminLayout  ← 侧边菜单（4 个后台管理页）
+ *   /  /products  /products/:id  ← DefaultLayout  公共门户外壳（游客可访问）
+ *   /user/*   → UserLayout       ← 顶部导航（个人中心、修改密码）
+ *   /admin/*  → AdminLayout      ← 侧边菜单（4 个后台管理页）
  * </pre>
  * 布局组件里放 {@code <router-view />}，子页面就渲染在里面。
  * 这样切页时外壳不重新挂载，体验更顺，也少写重复的导航代码。
@@ -24,7 +25,31 @@ import { isLoggedIn, isAdmin, authState } from '@/utils/auth'
  * 前端路由守卫拦不住直接构造 HTTP 请求的人。
  */
 const routes = [
-  { path: '/', redirect: '/login' },
+  // ---------------- 门户（游客可访问）----------------
+  {
+    path: '/',
+    component: () => import('@/layout/DefaultLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'home',
+        component: () => import('@/views/home/index.vue'),
+        meta: { public: true, title: '首页' }
+      },
+      {
+        path: 'products',
+        name: 'product-list',
+        component: () => import('@/views/product/list.vue'),
+        meta: { public: true, title: '农产品' }
+      },
+      {
+        path: 'products/:id',
+        name: 'product-detail',
+        component: () => import('@/views/product/detail.vue'),
+        meta: { public: true, title: '商品详情' }
+      }
+    ]
+  },
 
   {
     path: '/login',
@@ -104,9 +129,9 @@ const router = createRouter({
   scrollBehavior: () => ({ top: 0 })
 })
 
-/** 登录后应该落哪一页：管理员进后台，其他人进个人中心 */
+/** 登录后应该落哪一页：管理员进后台，其他人进首页 */
 export function homePath() {
-  return isAdmin() ? '/admin/users' : '/user/profile'
+  return isAdmin() ? '/admin/users' : '/'
 }
 
 router.beforeEach((to) => {
