@@ -9,7 +9,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/rxt_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: huangguojun
+    password: "123456"
 
   jackson:
     # ⚠️ Spring Boot 4 的 Web 层用的是 Jackson 3（tools.jackson 包），

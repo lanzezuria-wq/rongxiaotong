@@ -79,6 +79,18 @@ public class SecurityConfig {
                         // 其余系统管理接口一律管理员专属（用户管理 / 专家审核 / 字典增删改）
                         .requestMatchers("/api/admin/**").hasRole("admin")
 
+                        // ==================== P2 交易模块（M2 首页 + M3 农产品交易） ====================
+                        // 首页 + 商品浏览：SRS 表标注认证为"×"，游客不登录也能看
+                        .requestMatchers(HttpMethod.GET, "/api/home/**", "/api/product/**").permitAll()
+                        // 商品发布 / 编辑 / 上下架 / 删除：只允许农户角色。
+                        // ⚠️ 这里只挡得住"角色对不对"，挡不住"是不是本人发布的商品"——
+                        //    后者必须在 Service 层比对 farmer_id 和当前用户，否则农户 A 能改农户 B 的商品。
+                        .requestMatchers(HttpMethod.POST, "/api/product").hasRole("farmer")
+                        .requestMatchers(HttpMethod.PUT, "/api/product/**").hasRole("farmer")
+                        .requestMatchers(HttpMethod.DELETE, "/api/product/**").hasRole("farmer")
+                        // 购物车 / 订单 / 收货地址：登录即可访问，数据归属同样由 Service 层校验。
+                        // 这三组不用显式声明，走下面的 anyRequest().authenticated()
+
                         // 文章审核藏在专家模块的路径下（表58），单独点出来限制管理员
                         .requestMatchers(HttpMethod.PUT, "/api/article/*/audit").hasRole("admin")
                         // 文章列表 / 详情：SRS 表58 标注认证为"×"，游客可读
