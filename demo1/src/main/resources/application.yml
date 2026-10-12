@@ -9,7 +9,11 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/rxt_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: "123456"
+    # 密码优先从环境变量 RXT_DB_PASSWORD 读，读不到才退回到 "123456"。
+    # 这样每个人把自己本机的密码放在 IDEA 运行配置的 Environment variables 里，
+    # 各用各的、互不覆盖，也不会因为 git pull 又把别人的密码拉回来。
+    # 组员不设这个变量时，行为与之前完全一致（仍然用 123456）。
+    password: "${RXT_DB_PASSWORD:123456}"
 
   jackson:
     # ⚠️ Spring Boot 4 的 Web 层用的是 Jackson 3（tools.jackson 包），

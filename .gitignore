@@ -1,0 +1,56 @@
+# ==================== macOS ====================
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# ==================== IDE ====================
+# 注意：.idea 里已被跟踪的文件不会因为写进这里就自动消失，
+# 需要额外执行 git rm -r --cached .idea 才会停止跟踪（可选）
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+
+# ==================== Java / Maven ====================
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+!.mvn/wrapper/maven-wrapper.jar
+
+# ==================== Node / 前端 ====================
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+
+# ==================== 日志与临时文件 ====================
+*.log
+logs/
+*.tmp
+*.bak
+~$*
+
+# ==================== 本地私有配置（不要提交）====================
+# 根目录的 config/ 原本只写在 .git/info/exclude 里，
+# 而那个文件是本地私有的、不随仓库分发 —— 别人克隆后不会有这条规则。
+# 这里补一条正式的，保证换台机器也不会误提交本地配置。
+# （加了斜杠前缀只匹配仓库根目录的 config/，不影响 demo1/config/）
+/config/
+
+# 本地数据库 / 账号密码等个人配置，放到 *_local 文件里自行维护
+application-local.yml
+application-local.yaml
+application-local.properties
+config/application-local.yml
