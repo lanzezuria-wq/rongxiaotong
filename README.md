@@ -63,7 +63,8 @@ springbo/
 ```yaml
 url: jdbc:mysql://127.0.0.1:3306/rxt_db?...
 username: root
-password: "123456"      # ← 换机器要改这里
+password: "${RXT_DB_PASSWORD:123456}"   # 环境变量优先；未设置也能直接跑
+
 ```
 
 ---
