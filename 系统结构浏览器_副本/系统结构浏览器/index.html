@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>融销通 · 系统结构浏览器</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">融销通</span>
+    <span class="sub">系统结构浏览器</span>
+  </div>
+  <div class="searchbox">
+    <input id="search" type="text" placeholder="搜索文件名或路径，例如 FinancingService、init_p3">
+    <button id="clearSearch" title="清空">×</button>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="actions">
+    <button id="expandAll">展开全部</button>
+    <button id="collapseAll">折叠全部</button>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="sidebar">
+    <div class="filters">
+      <div class="flabel">按负责人筛选（点一下只看他的）：</div>
+      <div class="fbtns" id="filters">
+        <button class="fbtn on" data-owner="">全部</button>
+        <button class="fbtn b-p1" data-owner="P1" title="P1：后端地基 + M1 用户体系 + M7 系统管理">P1 地基/用户</button>
+        <button class="fbtn b-p2" data-owner="P2" title="P2：M2 首页 + M3 农产品交易">P2 交易</button>
+        <button class="fbtn b-p3" data-owner="P3" title="P3：M4 融资服务 + M6 银行端 + M5 专家助力">P3 融资/专家</button>
+        <button class="fbtn b-p4" data-owner="P4" title="P4：前端全部页面 + 联调">P4 前端</button>
+        <button class="fbtn b-me" data-owner="我" title="我给你生成的两份说明文档">我的文档</button>
+      </div>
+    </div>
+    <nav id="tree" class="tree"></nav>
+  </aside>
+
+  <section class="content" id="content">
+    <div class="empty">
+      <h1>从左边挑一个文件或目录</h1>
+      <p>点<strong>文件</strong>看源码 + 这段代码的说明；点<strong>目录</strong>看这个目录是干什么用的、里面有什么。</p>
+      <p class="tip">建议先看：<code>README.md</code> → <code>demo1/src/main/java/com/rxt/finance</code>（融资模块）→ <code>demo1/src/main/resources/sql</code>（建表脚本）</p>
+    </div>
+  </section>
+</main>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
