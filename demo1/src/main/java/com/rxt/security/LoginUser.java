@@ -42,6 +42,7 @@ public class LoginUser implements UserDetails {
     private final String password;
     /** 0 待审核 / 1 正常 / 2 已拒绝 / 3 已禁用 */
     private final Integer status;
+    private final Integer tokenVersion;
 
     public LoginUser(User user) {
         this.userId = user.getId();
@@ -49,6 +50,7 @@ public class LoginUser implements UserDetails {
         this.role = user.getRole();
         this.password = user.getPassword();
         this.status = user.getStatus();
+        this.tokenVersion = user.getTokenVersion() == null ? 0 : user.getTokenVersion();
     }
 
     /** 角色 → 权限。前缀 ROLE_ 是 Spring Security 的硬约定，不能省 */

@@ -8,11 +8,7 @@ import { clearAuth } from '@/utils/auth'
 /**
  * 修改密码（SRS 表13）。
  *
- * <p><b>本页有一个必须处理的后果，漏了会造成"改了密码但还在登录态"的错乱：</b>
- * JWT 是无状态的，服务端**无法主动作废**已经签发出去的 Token。
- * 也就是说，改完密码后，旧的 Token 在 24 小时有效期内仍然能用。
- * 所以正确做法是：修改成功后前端主动清掉本地 Token 并强制重新登录，
- * 顺带让用户用新密码验证一次。
+ * 改密后服务端递增凭证版本，所有旧 Token 失效；当前设备清理登录态并重新登录。
  *
  * <p>业务规则（后端负责校验，前端重复一遍做即时提示）：
  * <ul>
@@ -72,7 +68,7 @@ const rules = {
  */
 const strength = computed(() => {
   const p = form.newPassword
-  if (!p) return { level: 0, text: '', color: '#e5e7eb' }
+  if (!p) return { level: 0, text: '', color: 'var(--line)' }
 
   let score = 0
   if (p.length >= 8) score++
@@ -81,10 +77,10 @@ const strength = computed(() => {
   if (/\d/.test(p)) score++
   if (/[^a-zA-Z0-9]/.test(p)) score++
 
-  if (p.length < 6) return { level: 1, text: '过短', color: '#dc2626' }
-  if (score <= 2) return { level: 1, text: '弱', color: '#dc2626' }
-  if (score === 3) return { level: 2, text: '中', color: '#d97706' }
-  return { level: 3, text: '强', color: '#16a34a' }
+  if (p.length < 6) return { level: 1, text: '过短', color: 'var(--danger)' }
+  if (score <= 2) return { level: 1, text: '弱', color: 'var(--danger)' }
+  if (score === 3) return { level: 2, text: '中', color: 'var(--warning)' }
+  return { level: 3, text: '强', color: 'var(--accent)' }
 })
 
 async function handleSubmit() {
@@ -122,7 +118,7 @@ async function handleSubmit() {
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">修改密码</h2>
+        <h1 class="page-title">修改密码</h1>
         <p class="page-desc">
           为了账号安全，修改成功后需要重新登录。新密码不能与原密码相同。
         </p>
@@ -170,7 +166,7 @@ async function handleSubmit() {
                 :key="i"
                 class="strength-bar"
                 :style="{
-                  background: i <= strength.level ? strength.color : '#e5e7eb'
+                  background: i <= strength.level ? strength.color : 'var(--line)'
                 }"
               />
             </div>
@@ -218,7 +214,7 @@ async function handleSubmit() {
 }
 
 .strength-label {
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .strength-bars {

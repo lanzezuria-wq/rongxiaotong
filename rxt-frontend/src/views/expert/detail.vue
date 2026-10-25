@@ -1,7 +1,10 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getExpert } from '@/api/expert'
+
+const loadError = ref(false)
 
 /**
  * 专家详情 —— 简介 + 近期文章 + 提问入口。
@@ -17,11 +20,13 @@ function avatarText(name) {
 }
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     expert.value = await getExpert(route.params.id)
     document.title = `${expert.value?.realName || '专家详情'} · 融销通`
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -32,6 +37,7 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="expert-detail-page">
     <div class="container">
       <div v-loading="loading" class="detail-wrap">
@@ -40,10 +46,10 @@ onMounted(load)
             <div class="pf-head">
               <el-avatar :size="72" class="pf-avatar">{{ avatarText(expert.realName) }}</el-avatar>
               <div class="pf-info">
-                <div class="pf-name">
+                <h1 class="pf-name">
                   {{ expert.realName }}
                   <span class="pf-title">{{ expert.title }}</span>
-                </div>
+                </h1>
                 <div class="pf-specialty">{{ expert.specialty }}</div>
                 <div class="pf-org">{{ expert.org }}</div>
               </div>
@@ -84,6 +90,7 @@ onMounted(load)
       </div>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -106,7 +113,7 @@ onMounted(load)
 }
 
 .pf-avatar {
-  background: #16a34a;
+  background: var(--accent);
   font-size: 28px;
   flex-shrink: 0;
 }
@@ -118,26 +125,26 @@ onMounted(load)
 .pf-name {
   font-size: 20px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .pf-title {
   margin-left: 8px;
   font-size: 14px;
   font-weight: 400;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .pf-specialty {
   margin-top: 4px;
   font-size: 14px;
-  color: #16a34a;
+  color: var(--accent);
 }
 
 .pf-org {
   margin-top: 2px;
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .pf-desc {
@@ -150,7 +157,7 @@ onMounted(load)
 
 .pf-intro-label {
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
   margin-bottom: 6px;
 }
 
@@ -164,14 +171,14 @@ onMounted(load)
 .recent-card .card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .recent-item {
   display: flex;
   justify-content: space-between;
   padding: 10px 0;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--line);
   cursor: pointer;
 }
 
@@ -181,16 +188,16 @@ onMounted(load)
 
 .recent-title {
   font-size: 14px;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .recent-title:hover {
-  color: #16a34a;
+  color: var(--accent);
 }
 
 .recent-views {
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .recent-views .el-icon {

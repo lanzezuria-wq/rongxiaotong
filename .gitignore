@@ -54,3 +54,12 @@ application-local.yml
 application-local.yaml
 application-local.properties
 config/application-local.yml
+
+# 本地设计验证与环境变量
+.taste-skill/
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/build/
+.env
+.env.*
+!.env.example

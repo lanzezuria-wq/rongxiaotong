@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: ${RXT_DB_URL:jdbc:mysql://127.0.0.1:3306/rxt_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${RXT_DB_USER:root}
+    password: ${RXT_DB_PASSWORD:123456}
+rxt:
+  jwt:
+    secret: ${RXT_JWT_SECRET:development-only-rxt-key-not-for-production-2026}
+  mock:
+    enabled: true
+    verify-code: "111111"

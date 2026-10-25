@@ -1,7 +1,10 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { listExperts } from '@/api/expert'
+
+const loadError = ref(false)
 
 /**
  * 专家列表 —— 公开，农户挑选专家入口。
@@ -17,6 +20,7 @@ function avatarText(name) {
 }
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     const data = await listExperts({
@@ -27,6 +31,7 @@ async function load() {
     records.value = data?.records || []
     total.value = data?.total || 0
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -46,11 +51,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="expert-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">农业专家</h2>
+          <h1 class="page-title">农业专家</h1>
           <p class="page-desc">向农业专家在线提问、预约咨询</p>
         </div>
       </div>
@@ -64,7 +70,7 @@ onMounted(load)
       </div>
 
       <div v-loading="loading" class="expert-grid">
-        <el-card v-for="e in records" :key="e.id" shadow="hover" class="expert-card" @click="router.push(`/experts/${e.id}`)">
+        <el-card v-for="e in records" :key="e.id" shadow="never" class="expert-card" @click="router.push(`/experts/${e.id}`)">
           <div class="ec-head">
             <el-avatar :size="52" class="ec-avatar">{{ avatarText(e.realName) }}</el-avatar>
             <div class="ec-info">
@@ -91,6 +97,7 @@ onMounted(load)
       </div>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -123,7 +130,7 @@ onMounted(load)
 }
 
 .ec-avatar {
-  background: #16a34a;
+  background: var(--accent);
   font-size: 20px;
   flex-shrink: 0;
 }
@@ -131,26 +138,26 @@ onMounted(load)
 .ec-name {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .ec-title {
   margin-left: 6px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
   font-weight: 400;
 }
 
 .ec-specialty {
   margin-top: 4px;
   font-size: 13px;
-  color: #16a34a;
+  color: var(--accent);
 }
 
 .ec-org {
   margin-top: 2px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .ec-foot {
@@ -158,13 +165,13 @@ onMounted(load)
   justify-content: space-between;
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--line);
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .ec-rating {
-  color: #d97706;
+  color: var(--warning);
 }
 
 .ec-rating .el-icon {

@@ -1,9 +1,13 @@
 <script setup>
+import { productImage } from '@/utils/images'
+import RequestState from '@/components/RequestState.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listCart, updateCartQuantity, deleteCart } from '@/api/cart'
 import { formatPrice } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 购物车页 —— 勾选 + 改数量 + 删除 + 结算。
@@ -29,6 +33,7 @@ const totalPrice = computed(() =>
 )
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     items.value = (await listCart()) || []
@@ -36,6 +41,7 @@ async function load() {
     const ids = new Set(items.value.map((i) => i.id))
     selected.value = new Set([...selected.value].filter((id) => ids.has(id)))
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -97,11 +103,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="cart-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">购物车</h2>
+          <h1 class="page-title">购物车</h1>
           <p class="page-desc">勾选要结算的商品，可修改数量或移除</p>
         </div>
       </div>
@@ -125,26 +132,27 @@ onMounted(load)
             :class="{ invalid: item.productName == null }"
           >
             <el-checkbox
+              :aria-label="`选择${item.productName || '失效商品'}`"
               :model-value="selected.has(item.id)"
               :disabled="item.productName == null"
               @update:model-value="() => toggleItem(item.id)"
             />
-            <el-image :src="item.productImage" fit="cover" class="row-img">
+            <el-image :src="productImage(item.productImage)" fit="cover" class="row-img">
               <template #error><div class="row-img-fb"><el-icon><Picture /></el-icon></div></template>
             </el-image>
             <div class="row-name">
-              <div
+              <router-link
                 v-if="item.productName"
                 class="row-title"
-                @click="$router.push(`/products/${item.productId}`)"
+                :to="`/products/${item.productId}`"
               >
                 {{ item.productName }}
-              </div>
+              </router-link>
               <div v-else class="row-invalid">商品已失效，请移除</div>
               <div v-if="item.skuSpec" class="row-sku">{{ item.skuSpec }}</div>
             </div>
-            <div class="cell">¥{{ formatPrice(item.price) }}</div>
-            <div class="cell">
+            <div class="cell cell-price"><span class="mobile-cell-label">单价</span>¥{{ formatPrice(item.price) }}</div>
+            <div class="cell cell-quantity"><span class="mobile-cell-label">数量</span>
               <el-input-number
                 v-if="item.productName != null"
                 :model-value="item.quantity"
@@ -154,8 +162,8 @@ onMounted(load)
                 @change="(v) => onQuantityChange(item, v)"
               />
             </div>
-            <div class="cell cell-sub">¥{{ formatPrice(item.subtotal) }}</div>
-            <div class="cell">
+            <div class="cell cell-sub"><span class="mobile-cell-label">小计</span>¥{{ formatPrice(item.subtotal) }}</div>
+            <div class="cell cell-remove">
               <el-button text type="danger" @click="onRemove(item)">移除</el-button>
             </div>
           </div>
@@ -177,6 +185,7 @@ onMounted(load)
       </div>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -195,8 +204,8 @@ onMounted(load)
 .cart-head {
   padding: 12px 0;
   font-size: 13px;
-  color: #8a9099;
-  border-bottom: 1px solid #f0f2f5;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
 }
 
 .head-label {
@@ -209,7 +218,7 @@ onMounted(load)
 
 .cart-row {
   padding: 16px 0;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--line);
 }
 
 .cart-row:last-child {
@@ -233,38 +242,38 @@ onMounted(load)
   align-items: center;
   justify-content: center;
   color: #c0c4cc;
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .row-title {
   font-size: 14px;
-  color: #1f2329;
+  color: var(--ink);
   cursor: pointer;
 }
 
 .row-title:hover {
-  color: #16a34a;
+  color: var(--accent);
 }
 
 .row-invalid {
   font-size: 13px;
-  color: #dc2626;
+  color: var(--danger);
 }
 
 .row-sku {
   margin-top: 4px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .cell {
   text-align: center;
   font-size: 14px;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .cell-sub {
-  color: #e64545;
+  color: var(--accent-strong);
   font-weight: 600;
 }
 
@@ -280,11 +289,11 @@ onMounted(load)
 
 .cb-left {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .cb-count {
-  color: #e64545;
+  color: var(--accent-strong);
 }
 
 .cb-total {
@@ -292,7 +301,7 @@ onMounted(load)
 }
 
 .cb-total b {
-  color: #e64545;
+  color: var(--accent-strong);
   font-size: 20px;
 }
 </style>

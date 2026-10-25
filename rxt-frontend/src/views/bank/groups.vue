@@ -1,8 +1,11 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { listBankGroups } from '@/api/bank'
 import GroupCard from '@/components/GroupCard.vue'
+
+const loadError = ref(false)
 
 /**
  * 银行端联保小组列表 —— 审批工作台入口。
@@ -21,10 +24,12 @@ const FILTER = [
 ]
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     groups.value = (await listBankGroups({ status: query.status === '' ? undefined : query.status })) || []
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -44,11 +49,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="bank-groups-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">联保小组审批</h2>
+          <h1 class="page-title">联保小组审批</h1>
           <p class="page-desc">审批已成型的联保小组融资申请</p>
         </div>
         <el-button @click="$router.push('/bank/stats')">统计看板</el-button>
@@ -69,6 +75,7 @@ onMounted(load)
       <el-empty v-if="!loading && groups.length === 0" description="暂无联保小组" style="padding: 60px 0" />
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>

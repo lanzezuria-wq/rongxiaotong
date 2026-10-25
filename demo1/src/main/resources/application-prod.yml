@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: ${RXT_DB_URL}
+    username: ${RXT_DB_USER}
+    password: ${RXT_DB_PASSWORD}
+rxt:
+  jwt:
+    secret: ${RXT_JWT_SECRET}
+  mock:
+    enabled: false
+    verify-code: ""
+logging:
+  level:
+    com.rxt: info
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

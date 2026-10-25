@@ -1,8 +1,12 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { reactive, ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { listProducts } from '@/api/product'
 import ProductCard from '@/components/ProductCard.vue'
 import { PRODUCT_CATEGORY_OPTIONS } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 商品列表页 —— 搜索 + 分类筛选 + 排序 + 分页（游客可访问）。
@@ -16,8 +20,8 @@ const records = ref([])
 const total = ref(0)
 
 const query = reactive({
-  keyword: '',
-  categoryCode: '',
+  keyword: String(useRoute().query.keyword || ''),
+  categoryCode: String(useRoute().query.category || ''),
   sort: 'default',
   page: 1,
   size: 12
@@ -32,6 +36,7 @@ const SORT_OPTIONS = [
 ]
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     const data = await listProducts({
@@ -44,6 +49,7 @@ async function load() {
     records.value = data?.records || []
     total.value = data?.total || 0
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -70,8 +76,10 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="product-list-page">
     <div class="container">
+      <div class="page-header"><div><h1 class="page-title">农产品集市</h1><p class="page-desc">发现来自田间的好收成，选择你需要的每一份食材。</p></div><span class="muted">{{ total }} 件在售商品</span></div>
       <el-card shadow="never" class="filter-card">
         <div class="filter-row">
           <el-input
@@ -122,6 +130,7 @@ onMounted(load)
       </div>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -150,7 +159,7 @@ onMounted(load)
 .filter-label,
 .sort-label {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--muted);
   white-space: nowrap;
 }
 

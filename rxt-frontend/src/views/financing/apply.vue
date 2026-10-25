@@ -90,7 +90,7 @@ async function onCreateGroup() {
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">融资申请</h2>
+          <h1 class="page-title">融资申请</h1>
           <p class="page-desc">申请金额 1 万 ~ 50 万，提交后加入 3~10 人联保小组共同担保</p>
         </div>
       </div>
@@ -180,7 +180,7 @@ async function onCreateGroup() {
 .hint {
   margin-left: 10px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .region-row {
@@ -202,7 +202,7 @@ async function onCreateGroup() {
 .section-head h3 {
   margin: 0 0 12px;
   font-size: 16px;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .group-grid {

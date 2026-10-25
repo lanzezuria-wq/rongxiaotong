@@ -1,6 +1,8 @@
 package com.rxt.config;
 
 import com.rxt.security.JwtAuthenticationFilter;
+import com.rxt.security.OperationAuditFilter;
+import com.rxt.service.OperationLogService;
 import com.rxt.security.RestAccessDeniedHandler;
 import com.rxt.security.RestAuthEntryPoint;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OperationLogService operationLogs;
     private final RestAuthEntryPoint restAuthEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
 
@@ -135,7 +138,8 @@ public class SecurityConfig {
 
                 // 把 JWT 过滤器插到"用户名密码认证过滤器"之前，
                 // 保证在链尾的授权判断执行时，SecurityContext 里已经有身份了
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new OperationAuditFilter(operationLogs), JwtAuthenticationFilter.class);
 
         return http.build();
     }

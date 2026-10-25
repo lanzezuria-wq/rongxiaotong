@@ -1,0 +1,48 @@
+name: rongxiaotong-demo
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: rxt_db
+      MYSQL_USER: rxt
+      MYSQL_PASSWORD: ${RXT_DB_PASSWORD:?请先配置 .env 中的数据库密码}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请先配置 .env 中的 root 密码}
+    volumes:
+      - rxt-data:/var/lib/mysql
+      - ./demo1/src/main/resources/sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./demo1/src/main/resources/sql/init_trade.sql:/docker-entrypoint-initdb.d/02-trade.sql:ro
+      - ./demo1/src/main/resources/sql/init_p3.sql:/docker-entrypoint-initdb.d/03-assist.sql:ro
+      - ./demo1/src/main/resources/sql/migrate_portfolio.sql:/docker-entrypoint-initdb.d/04-portfolio.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -p\"$$MYSQL_ROOT_PASSWORD\""]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    networks: [rxt]
+  backend:
+    build: ./demo1
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      RXT_DB_URL: jdbc:mysql://db:3306/rxt_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
+      RXT_DB_USER: rxt
+      RXT_DB_PASSWORD: ${RXT_DB_PASSWORD}
+      RXT_JWT_SECRET: ${RXT_JWT_SECRET:?请先配置至少 32 字节的独立签名密钥}
+      RXT_TRUSTED_PROXIES: 172.30.75.3
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [rxt]
+  frontend:
+    build: ./rxt-frontend
+    ports: ["127.0.0.1:8088:80"]
+    depends_on: [backend]
+    networks:
+      rxt:
+        ipv4_address: 172.30.75.3
+volumes:
+  rxt-data:
+networks:
+  rxt:
+    ipam:
+      config:
+        - subnet: 172.30.75.0/24

@@ -1,9 +1,12 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { reactive, ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getInfo, updateInfo } from '@/api/user'
 import { setUser } from '@/utils/auth'
 import { roleLabel, userStatusLabel, userStatusTagType } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 个人中心 —— 查看 + 编辑自己的资料（SRS 表14）。
@@ -53,6 +56,7 @@ const statusText = computed(() => userStatusLabel(profile.value?.status))
 
 /** 拉取最新资料并回填两个区 */
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     const data = await getInfo()
@@ -69,6 +73,7 @@ async function load() {
     // 顺手刷新全局登录态里的用户信息，让顶部导航的名字跟着变
     setUser(data)
   } catch (e) {
+    loadError.value = true
     // 拦截器已提示
   } finally {
     loading.value = false
@@ -114,10 +119,11 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">个人中心</h2>
+        <h1 class="page-title">个人中心</h1>
         <p class="page-desc">
           查看账号信息，并维护姓名、联系方式与所在地区。手机号作为登录凭证不可修改。
         </p>
@@ -203,6 +209,7 @@ onMounted(load)
       </el-col>
     </el-row>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -218,20 +225,20 @@ onMounted(load)
 }
 
 .account-avatar {
-  background: #16a34a;
+  background: var(--accent);
   font-size: 24px;
 }
 
 .account-name {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .region-row {

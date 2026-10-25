@@ -94,3 +94,10 @@ export function isExpert() {
 export function currentUserId() {
   return authState.user?.id ?? null
 }
+
+window.addEventListener('storage', (event) => {
+  if (event.key === TOKEN_KEY || event.key === USER_KEY || event.key === null) {
+    authState.token = localStorage.getItem(TOKEN_KEY) || ''
+    authState.user = readStoredUser()
+  }
+})

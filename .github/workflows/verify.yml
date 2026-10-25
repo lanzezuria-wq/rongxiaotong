@@ -1,0 +1,58 @@
+name: Verify
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-only-password"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    env:
+      MYSQL_PWD: ci-only-password
+      RXT_DB_URL: jdbc:mysql://127.0.0.1:3306/rxt_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
+      RXT_DB_PASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Create isolated test data
+        run: |
+          mysql -h127.0.0.1 -uroot < demo1/src/main/resources/sql/init.sql
+          mysql -h127.0.0.1 -uroot < demo1/src/main/resources/sql/init_trade.sql
+          mysql -h127.0.0.1 -uroot < demo1/src/main/resources/sql/init_p3.sql
+          mysql -h127.0.0.1 -uroot rxt_db < demo1/src/main/resources/sql/migrate_portfolio.sql
+      - name: Test and package
+        run: mvn -B -f demo1/pom.xml verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-reports
+          path: demo1/target/surefire-reports/
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rxt-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.14.0'
+          cache: npm
+          cache-dependency-path: rxt-frontend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build

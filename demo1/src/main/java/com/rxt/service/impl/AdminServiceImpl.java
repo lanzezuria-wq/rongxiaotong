@@ -20,6 +20,7 @@ import com.rxt.mapper.ArticleMapper;
 import com.rxt.mapper.ExpertMapper;
 import com.rxt.mapper.UserMapper;
 import com.rxt.service.AdminService;
+import com.rxt.service.OperationLogService;
 import com.rxt.vo.ArticleVO;
 import com.rxt.vo.UserVO;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +65,7 @@ public class AdminServiceImpl implements AdminService {
     private final UserMapper userMapper;
     private final ExpertMapper expertMapper;
     private final ArticleMapper articleMapper;
+    private final OperationLogService operationLogs;
 
     // ==================================================================================
     // 1. 用户列表
@@ -108,6 +110,11 @@ public class AdminServiceImpl implements AdminService {
             throw new ResourceNotFoundException("用户不存在");
         }
 
+        if (UserConst.ROLE_EXPERT.equals(target.getRole())
+                && (target.getStatus() == UserConst.STATUS_PENDING || target.getStatus() == UserConst.STATUS_REJECTED)) {
+            throw new BizException(ResultCode.PARAM_ERROR, "待审核或审核未通过的专家请通过专家审核流程处理");
+        }
+
         // 表38 异常处理："禁用自己 → 提示不能禁用自己的账号"
         // 只在"禁用"时判断：启用自己是无意义操作（能登录就说明没被禁用）
         if (status == UserConst.STATUS_DISABLED && operatorId.equals(targetUserId)) {
@@ -123,9 +130,11 @@ public class AdminServiceImpl implements AdminService {
 
         // 用 LambdaUpdateWrapper 而不是 updateById(整个实体)：
         // 后者会把查出来的所有字段（含密码）一起写回，一旦并发修改就会互相覆盖
-        userMapper.update(null, new LambdaUpdateWrapper<User>()
-                .eq(User::getId, targetUserId)
-                .set(User::getStatus, status));
+        int changed = userMapper.update(null, new LambdaUpdateWrapper<User>()
+                .eq(User::getId, targetUserId).eq(User::getStatus, target.getStatus())
+                .set(User::getStatus, status).setSql("token_version = token_version + 1"));
+        if (changed != 1) throw new BizException(ResultCode.PARAM_ERROR, "账号状态已变化，请刷新后重试");
+        operationLogs.record(operatorId, status == UserConst.STATUS_DISABLED ? "禁用用户" : "启用用户", targetUserId);
 
         log.info("管理员 {} 将用户 {}（{}）状态改为 {}", operatorId, targetUserId, target.getPhone(), status);
     }
@@ -154,10 +163,11 @@ public class AdminServiceImpl implements AdminService {
         boolean approved = AuditConst.isApproved(dto.getStatus());
         int newStatus = approved ? UserConst.STATUS_NORMAL : UserConst.STATUS_REJECTED;
 
-        userMapper.update(null, new LambdaUpdateWrapper<User>()
-                .eq(User::getId, userId)
-                .set(User::getStatus, newStatus)
-                .set(User::getAuditRemark, dto.getRemark()));
+        int changed = userMapper.update(null, new LambdaUpdateWrapper<User>()
+                .eq(User::getId, userId).eq(User::getStatus, UserConst.STATUS_PENDING)
+                .set(User::getStatus, newStatus).set(User::getAuditRemark, dto.getRemark()));
+        if (changed != 1) throw new BizException(ResultCode.PARAM_ERROR, "该专家已被审核，请刷新列表");
+        operationLogs.record(auditorId, approved ? "通过专家审核" : "驳回专家审核", userId);
 
         // 表39："专家审核通过后，写入 t_expert 表"
         if (approved) {
@@ -230,12 +240,14 @@ public class AdminServiceImpl implements AdminService {
 
         boolean approved = AuditConst.isApproved(dto.getStatus());
 
-        articleMapper.update(null, new LambdaUpdateWrapper<Article>()
-                .eq(Article::getId, articleId)
+        int changed = articleMapper.update(null, new LambdaUpdateWrapper<Article>()
+                .eq(Article::getId, articleId).eq(Article::getStatus, ArticleConst.STATUS_PENDING)
                 .set(Article::getStatus, approved ? ArticleConst.STATUS_PUBLISHED : ArticleConst.STATUS_REJECTED)
                 .set(Article::getAuditRemark, dto.getRemark())
                 .set(Article::getAuditBy, auditorId)
                 .set(Article::getAuditTime, LocalDateTime.now()));
+        if (changed != 1) throw new BizException(ResultCode.PARAM_ERROR, "该文章已被审核，请刷新列表");
+        operationLogs.record(auditorId, approved ? "通过文章审核" : "驳回文章审核", articleId);
 
         log.info("管理员 {} 审核文章 {}（{}）：{}", auditorId, articleId, article.getTitle(),
                 approved ? "通过" : "拒绝");

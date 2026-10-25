@@ -73,9 +73,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (loginUser == null) {
                     // Token 合法，但账号已被物理删除
                     request.setAttribute(JWT_ERROR_ATTR, JWT_ERROR_INVALID);
-                } else if (!loginUser.isAccountNonLocked()) {
+                } else if (!loginUser.isEnabled()) {
                     // Token 合法，但账号在 Token 签发后被禁用了 —— 立即失效
                     request.setAttribute(JWT_ERROR_ATTR, JWT_ERROR_DISABLED);
+                } else if (!loginUser.getTokenVersion().equals(claims.get("ver", Integer.class))) {
+                    request.setAttribute(JWT_ERROR_ATTR, JWT_ERROR_INVALID);
                 } else {
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(

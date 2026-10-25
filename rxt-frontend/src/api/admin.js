@@ -94,3 +94,5 @@ export default {
   listArticles,
   auditArticle
 }
+
+export function listOperationLogs(params) { return request.get('/admin/logs', { params }) }

@@ -1,9 +1,12 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { reactive, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { askQuestion } from '@/api/question'
 import { listExperts } from '@/api/expert'
+
+const loadError = ref(false)
 
 /**
  * 在线提问 —— 可定向指定某位专家，也可面向所有专家。
@@ -29,10 +32,12 @@ const rules = {
 }
 
 async function loadExperts() {
+  loadError.value = false
   try {
     const data = await listExperts({ page: 1, size: 100 })
     experts.value = data?.records || []
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   }
 }
@@ -65,11 +70,12 @@ onMounted(() => {
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="loadExperts">
   <div class="ask-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">在线提问</h2>
+          <h1 class="page-title">在线提问</h1>
           <p class="page-desc">指定专家定向提问，或不指定面向所有专家</p>
         </div>
       </div>
@@ -96,6 +102,7 @@ onMounted(() => {
       </el-card>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>

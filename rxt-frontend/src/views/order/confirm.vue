@@ -1,4 +1,6 @@
 <script setup>
+import { productImage } from '@/utils/images'
+import RequestState from '@/components/RequestState.vue'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -6,6 +8,8 @@ import { listCart } from '@/api/cart'
 import { listAddress, createAddress } from '@/api/address'
 import { createOrder, payOrder } from '@/api/order'
 import { formatPrice } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 确认订单页 —— 核对商品 + 选地址 + 提交订单 + Mock 支付。
@@ -52,6 +56,7 @@ const addrForm = reactive({
 })
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     const all = (await listCart()) || []
@@ -63,6 +68,7 @@ async function load() {
     const def = addr.find((a) => a.isDefault === 1) || addr[0]
     selectedAddressId.value = def?.id ?? null
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -93,7 +99,7 @@ async function onPay() {
   paying.value = true
   try {
     await payOrder(createdOrder.value.id)
-    ElMessage.success('支付成功')
+    ElMessage.success('模拟支付完成，未发生实际扣款')
     router.push('/buyer/orders')
   } catch (e) {
     // 拦截器已统一提示
@@ -139,11 +145,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="confirm-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">确认订单</h2>
+          <h1 class="page-title">确认订单</h1>
           <p class="page-desc">核对商品与收货信息，提交后 15 分钟内需完成支付</p>
         </div>
       </div>
@@ -163,7 +170,7 @@ onMounted(load)
             <el-card shadow="never" class="block">
               <template #header><span class="card-title">商品清单</span></template>
               <div v-for="it in items" :key="it.id" class="item-row">
-                <el-image :src="it.productImage" fit="cover" class="item-img">
+                <el-image :src="productImage(it.productImage)" fit="cover" class="item-img">
                   <template #error><div class="item-img-fb"><el-icon><Picture /></el-icon></div></template>
                 </el-image>
                 <div class="item-info">
@@ -219,7 +226,7 @@ onMounted(load)
                     应付金额：<b>¥{{ formatPrice(createdOrder.totalAmount) }}</b>
                   </div>
                   <el-button type="primary" size="large" :loading="paying" @click="onPay">
-                    立即支付（Mock）
+                    模拟支付
                   </el-button>
                   <el-button size="large" @click="$router.push('/buyer/orders')">稍后支付</el-button>
                 </div>
@@ -258,6 +265,7 @@ onMounted(load)
       </template>
     </el-dialog>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -276,7 +284,7 @@ onMounted(load)
 .card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .block-head {
@@ -290,7 +298,7 @@ onMounted(load)
   align-items: center;
   gap: 12px;
   padding: 10px 0;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--line);
 }
 
 .item-row:last-of-type {
@@ -311,7 +319,7 @@ onMounted(load)
   align-items: center;
   justify-content: center;
   color: #c0c4cc;
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .item-info {
@@ -320,38 +328,38 @@ onMounted(load)
 
 .item-name {
   font-size: 14px;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .item-sku {
   margin-top: 4px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .item-qty {
   width: 60px;
   text-align: center;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .item-sub {
   width: 110px;
   text-align: right;
   font-size: 14px;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .total-row {
   padding-top: 12px;
   text-align: right;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .total-row b {
-  color: #e64545;
+  color: var(--accent-strong);
   font-size: 18px;
 }
 
@@ -369,7 +377,7 @@ onMounted(load)
 
 .addr-text {
   font-size: 14px;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .submit-bar {
@@ -390,7 +398,7 @@ onMounted(load)
 }
 
 .pay-amount b {
-  color: #e64545;
+  color: var(--accent-strong);
   font-size: 22px;
 }
 

@@ -1,9 +1,12 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { listOrders, shipOrder } from '@/api/order'
 import { orderStatusLabel, orderStatusTagType, ORDER_STATUS_FILTER, formatPrice } from '@/utils/format'
 import OrderDetailDialog from '@/components/OrderDetailDialog.vue'
+
+const loadError = ref(false)
 
 /**
  * 我的销售（农户视角）—— role=farmer 查询我卖出的订单。
@@ -22,6 +25,7 @@ const shipping = ref(false)
 const shipForm = reactive({ orderId: null, expressCompany: '', expressNo: '' })
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     const data = await listOrders({
@@ -33,6 +37,7 @@ async function load() {
     records.value = data?.records || []
     total.value = data?.total || 0
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -85,11 +90,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="order-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">我的销售</h2>
+          <h1 class="page-title">我的销售</h1>
           <p class="page-desc">我售出的商品订单，待发货的订单在这里发货</p>
         </div>
       </div>
@@ -162,6 +168,7 @@ onMounted(load)
       </template>
     </el-dialog>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -186,7 +193,7 @@ onMounted(load)
   align-items: center;
   justify-content: space-between;
   padding-bottom: 10px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--line);
 }
 
 .oc-meta {
@@ -198,12 +205,12 @@ onMounted(load)
 .oc-no {
   font-size: 13px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .oc-time {
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .oc-body {
@@ -217,13 +224,13 @@ onMounted(load)
   display: flex;
   gap: 16px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .oc-amount {
   font-size: 16px;
   font-weight: 700;
-  color: #e64545;
+  color: var(--accent-strong);
 }
 
 .oc-actions {
@@ -231,6 +238,6 @@ onMounted(load)
   justify-content: flex-end;
   gap: 8px;
   padding-top: 12px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--line);
 }
 </style>

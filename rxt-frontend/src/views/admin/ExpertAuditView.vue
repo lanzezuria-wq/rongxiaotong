@@ -1,8 +1,11 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { reactive, ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listUsers, auditExpert } from '@/api/admin'
 import { AUDIT_APPROVED, AUDIT_REJECTED, roleLabel } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 专家账号审核（SRS 表39 / 表59-3）。
@@ -74,6 +77,7 @@ function parseExtend(row) {
 }
 
 async function fetchList() {
+  loadError.value = false
   loading.value = true
   try {
     const params = { page: query.page, size: query.size, role: 'expert' }
@@ -92,6 +96,7 @@ async function fetchList() {
     }))
     pageInfo.total = data.total || 0
   } catch (e) {
+    loadError.value = true
     tableData.value = []
     pageInfo.total = 0
   } finally {
@@ -157,10 +162,11 @@ onMounted(fetchList)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="fetchList">
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">专家审核</h2>
+        <h1 class="page-title">专家审核</h1>
         <p class="page-desc">
           审核专家的注册申请。通过后账号状态变为「正常」并写入专家档案；
           拒绝需填写理由。审核结果不可撤回。
@@ -207,7 +213,7 @@ onMounted(fetchList)
 
     <!-- 表格 -->
     <div class="table-card">
-      <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%">
+      <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column prop="id" label="用户ID" width="80" align="center" />
 
         <el-table-column label="申请人" min-width="150">
@@ -398,6 +404,7 @@ onMounted(fetchList)
       </template>
     </el-dialog>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -420,19 +427,19 @@ onMounted(fetchList)
 }
 
 .applicant-avatar {
-  background: #16a34a;
+  background: var(--accent);
   font-size: 13px;
   flex-shrink: 0;
 }
 
 .applicant-name {
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .applicant-phone {
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .muted {
@@ -452,6 +459,6 @@ onMounted(fetchList)
 
 .filter-hint {
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 </style>

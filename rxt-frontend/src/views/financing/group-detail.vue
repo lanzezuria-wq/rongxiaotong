@@ -1,8 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import RequestState from '@/components/RequestState.vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getGroup } from '@/api/financing'
 import { groupStatusLabel, groupStatusTagType, industryLabel, formatPrice } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 联保小组详情 —— 小组信息 + 成员名单（农户判断是否加入、银行核验用）。
@@ -10,6 +13,11 @@ import { groupStatusLabel, groupStatusTagType, industryLabel, formatPrice } from
 const route = useRoute()
 const router = useRouter()
 
+const narrowViewport = window.matchMedia('(max-width: 767px)')
+const compact = ref(narrowViewport.matches)
+const syncViewport = (event) => { compact.value = event.matches }
+onMounted(() => narrowViewport.addEventListener('change', syncViewport))
+onBeforeUnmount(() => narrowViewport.removeEventListener('change', syncViewport))
 const loading = ref(false)
 const group = ref(null)
 
@@ -20,11 +28,13 @@ const joinStatusText = {
 }
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     group.value = await getGroup(route.params.id)
     document.title = `${group.value?.groupNo || '小组详情'} · 融销通`
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -35,11 +45,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="gd-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">联保小组详情</h2>
+          <h1 class="page-title">联保小组详情</h1>
         </div>
         <el-button @click="router.back()">返回</el-button>
       </div>
@@ -56,7 +67,7 @@ onMounted(load)
             </el-tag>
           </div>
 
-          <el-descriptions :column="3" border class="gd-desc">
+          <el-descriptions :column="compact ? 1 : 3" border class="gd-desc">
             <el-descriptions-item label="申请总额">¥{{ formatPrice(group.totalAmount) }}</el-descriptions-item>
             <el-descriptions-item label="成员数">{{ group.currentMembers }}/{{ group.maxMembers }}</el-descriptions-item>
             <el-descriptions-item label="创建时间">{{ group.createdAt }}</el-descriptions-item>
@@ -86,6 +97,7 @@ onMounted(load)
       </div>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -107,14 +119,14 @@ onMounted(load)
 
 .gd-no {
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .gd-title {
   margin-top: 4px;
   font-size: 18px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .gd-desc {
@@ -128,6 +140,6 @@ onMounted(load)
 .card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 </style>

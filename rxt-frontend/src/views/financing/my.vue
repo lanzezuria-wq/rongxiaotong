@@ -1,4 +1,5 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -11,6 +12,8 @@ import {
   loanTermLabel,
   formatPrice
 } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 我的融资 —— 申请列表（状态筛选 + 详情 + 取消）。
@@ -36,6 +39,7 @@ const detailLoading = ref(false)
 const detail = ref(null)
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     const data = await listFinancing({
@@ -46,6 +50,7 @@ async function load() {
     records.value = data?.records || []
     total.value = data?.total || 0
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -97,11 +102,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="my-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">我的融资</h2>
+          <h1 class="page-title">我的融资</h1>
           <p class="page-desc">我的融资申请与审批进度</p>
         </div>
         <el-button type="primary" @click="$router.push('/financing/apply')">申请融资</el-button>
@@ -188,6 +194,7 @@ onMounted(load)
       </div>
     </el-dialog>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -216,7 +223,7 @@ onMounted(load)
 .fin-amount {
   font-size: 20px;
   font-weight: 700;
-  color: #e64545;
+  color: var(--accent-strong);
 }
 
 .fin-meta {
@@ -225,13 +232,13 @@ onMounted(load)
   gap: 12px;
   margin-top: 10px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .fin-time {
   margin-top: 6px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .fin-actions {
@@ -240,7 +247,7 @@ onMounted(load)
   gap: 8px;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--line);
 }
 
 .detail-section {
@@ -249,19 +256,19 @@ onMounted(load)
 
 .detail-label {
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
   margin-bottom: 4px;
 }
 
 .detail-text {
   font-size: 14px;
-  color: #1f2329;
+  color: var(--ink);
   line-height: 1.6;
 }
 
 .detail-remark {
   margin-top: 4px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--muted);
 }
 </style>

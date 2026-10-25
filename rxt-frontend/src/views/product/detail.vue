@@ -1,4 +1,6 @@
 <script setup>
+import { productImage } from '@/utils/images'
+import RequestState from '@/components/RequestState.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -6,6 +8,8 @@ import { getProduct } from '@/api/product'
 import { addToCart } from '@/api/cart'
 import { isLoggedIn } from '@/utils/auth'
 import { formatPrice, productCategoryLabel } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 商品详情页 —— 图片 + SKU 选择 + 加购（游客可浏览，加购需登录）。
@@ -30,8 +34,8 @@ const activeImage = ref(0)
 
 const images = computed(() => {
   const imgs = product.value?.images || []
-  if (imgs.length) return imgs
-  return product.value?.coverImage ? [product.value.coverImage] : []
+  if (imgs.length) return imgs.map(productImage).filter(Boolean)
+  return productImage(product.value?.coverImage) ? [productImage(product.value.coverImage)] : []
 })
 
 /** 当前选中的规格项；无规格时为 null */
@@ -50,6 +54,7 @@ watch(selectedSku, () => {
 })
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     const data = await getProduct(route.params.id)
@@ -57,6 +62,7 @@ async function load() {
     if (data?.skuList?.length) selectedSpec.value = data.skuList[0].spec
     document.title = `${data?.name || '商品详情'} · 融销通`
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示（1008 商品不存在等）
   } finally {
     loading.value = false
@@ -92,6 +98,7 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="detail-page" v-loading="loading">
     <template v-if="product">
       <el-card shadow="never" class="detail-main">
@@ -120,7 +127,7 @@ onMounted(load)
 
           <!-- 右：购买信息 -->
           <div class="info">
-            <div class="name">{{ product.name }}</div>
+            <h1 class="name">{{ product.name }}</h1>
             <div class="sub-row">
               <span class="category">{{ productCategoryLabel(product.categoryCode) }}</span>
               <span class="meta">已售 {{ product.salesCount ?? 0 }}</span>
@@ -177,6 +184,7 @@ onMounted(load)
       <el-button type="primary" @click="$router.push('/products')">返回商品列表</el-button>
     </el-empty>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -218,7 +226,7 @@ onMounted(load)
   align-items: center;
   justify-content: center;
   color: #c0c4cc;
-  background: #f5f7fa;
+  background: var(--bg);
   border-radius: 8px;
 }
 
@@ -236,14 +244,14 @@ onMounted(load)
 }
 
 .thumb.active {
-  border-color: #16a34a;
+  border-color: var(--accent);
 }
 
 /* ---------- 信息 ---------- */
 .name {
   font-size: 22px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
   line-height: 1.4;
 }
 
@@ -253,11 +261,11 @@ onMounted(load)
   gap: 16px;
   margin-top: 10px;
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .category {
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .price-block {
@@ -268,7 +276,7 @@ onMounted(load)
 }
 
 .price {
-  color: #e64545;
+  color: var(--accent-strong);
   font-size: 14px;
 }
 
@@ -279,7 +287,7 @@ onMounted(load)
 
 .unit {
   margin-left: 6px;
-  color: #8a9099;
+  color: var(--muted);
   font-size: 14px;
 }
 
@@ -291,13 +299,13 @@ onMounted(load)
 .block-label {
   margin-bottom: 10px;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .stock-tip {
   margin-left: 12px;
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .action-row {
@@ -310,14 +318,14 @@ onMounted(load)
   gap: 6px;
   margin-top: 20px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 /* ---------- 详情 ---------- */
 .card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .desc-text {

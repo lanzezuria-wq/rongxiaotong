@@ -1,10 +1,13 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getGroup } from '@/api/financing'
 import { approveGroup } from '@/api/bank'
 import { groupStatusLabel, groupStatusTagType, industryLabel, formatPrice } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 银行审批页 —— 展示小组与成员，提交审批结论。
@@ -30,11 +33,13 @@ const form = reactive({
 const joinStatusText = { 0: '申请中', 1: '已加入', 2: '已拒绝' }
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     group.value = await getGroup(route.params.id)
     document.title = `${group.value?.groupNo || '审批'} · 融销通`
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -73,11 +78,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="approve-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">审批联保小组</h2>
+          <h1 class="page-title">审批联保小组</h1>
         </div>
         <el-button @click="router.back()">返回</el-button>
       </div>
@@ -128,7 +134,7 @@ onMounted(load)
               </el-form-item>
               <el-form-item label="信用评分">
                 <el-input-number v-model="form.creditScore" :min="0" :max="100" />
-                <span class="hint">留空由 Mock 自动生成</span>
+                <span class="hint">演示环境可留空，系统将生成模拟核定值</span>
               </el-form-item>
               <el-form-item label="年化利率">
                 <el-input-number v-model="form.interestRate" :min="3.85" :max="7.00" :precision="2" :step="0.01" />
@@ -153,6 +159,7 @@ onMounted(load)
       </div>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -174,25 +181,25 @@ onMounted(load)
 
 .g-no {
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .g-title {
   margin-top: 4px;
   font-size: 18px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .hint {
   margin-left: 10px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 </style>

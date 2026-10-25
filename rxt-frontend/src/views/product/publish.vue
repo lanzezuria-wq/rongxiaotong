@@ -112,7 +112,7 @@ async function onSubmit() {
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">发布商品</h2>
+          <h1 class="page-title">发布商品</h1>
           <p class="page-desc">填写商品信息，发布后默认上架</p>
         </div>
       </div>
@@ -222,7 +222,7 @@ async function onSubmit() {
 .hint {
   margin-left: 10px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .img-editor {
@@ -251,7 +251,7 @@ async function onSubmit() {
   align-items: center;
   justify-content: center;
   color: #c0c4cc;
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .img-remove {
@@ -259,7 +259,7 @@ async function onSubmit() {
   top: -8px;
   right: -8px;
   font-size: 18px;
-  color: #dc2626;
+  color: var(--danger);
   cursor: pointer;
   background: #fff;
   border-radius: 50%;
@@ -293,6 +293,6 @@ async function onSubmit() {
 
 .sku-head {
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 </style>

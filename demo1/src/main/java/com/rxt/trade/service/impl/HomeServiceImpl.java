@@ -4,6 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.rxt.entity.Article;
 import com.rxt.entity.DictItem;
 import com.rxt.mapper.ArticleMapper;
+import com.rxt.mapper.UserMapper;
+import com.rxt.finance.mapper.GuaranteeGroupMapper;
+import com.rxt.finance.entity.GuaranteeGroup;
+import com.rxt.finance.constant.FinancingConst;
+import org.springframework.beans.factory.annotation.Value;
 import com.rxt.mapper.DictItemMapper;
 import com.rxt.trade.constant.ProductConst;
 import com.rxt.trade.entity.Product;
@@ -37,6 +42,11 @@ public class HomeServiceImpl implements HomeService {
     private final ProductMapper productMapper;
     private final DictItemMapper dictItemMapper;
     private final ArticleMapper articleMapper;
+    private final UserMapper userMapper;
+    private final GuaranteeGroupMapper groupMapper;
+
+    @Value("${rxt.mock.enabled:false}")
+    private boolean demoMode;
 
     /** 轮播图字典类型 */
     private static final String BANNER_TYPE = "banner";
@@ -109,12 +119,13 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public Map<String, Object> stats() {
-        // 需求里这就是 Mock 数据。不真去 count 的原因：
-        // 一是首页每次都打三个 count 查询没必要，二是演示时数字好看比数字真实重要。
         Map<String, Object> stats = new LinkedHashMap<>(4);
-        stats.put("productCount", 1280);
-        stats.put("financingSuccess", 356);
-        stats.put("userCount", 5420);
+        stats.put("productCount", productMapper.selectCount(new LambdaQueryWrapper<Product>()
+                .eq(Product::getStatus, ProductConst.STATUS_ON_SALE)));
+        stats.put("financingSuccess", groupMapper.selectCount(new LambdaQueryWrapper<GuaranteeGroup>()
+                .eq(GuaranteeGroup::getStatus, FinancingConst.GROUP_APPROVED)));
+        stats.put("userCount", userMapper.selectCount(null));
+        stats.put("demoMode", demoMode);
         return stats;
     }
 }

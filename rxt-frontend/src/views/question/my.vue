@@ -1,9 +1,12 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { listQuestions, answerQuestion } from '@/api/question'
 import { isExpert } from '@/utils/auth'
 import { questionStatusLabel, questionStatusTagType } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 我的提问 —— 按角色分视角：普通用户看「我提的问题」，专家看「待我回答的 + 我提的」。
@@ -24,11 +27,13 @@ const FILTER = [
 ]
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     records.value =
       (await listQuestions({ status: query.status === '' ? undefined : query.status })) || []
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -67,11 +72,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="qmy-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">我的提问</h2>
+          <h1 class="page-title">我的提问</h1>
           <p class="page-desc">{{ isExpert() ? '待我回答的问题 + 我提的问题' : '我向专家提的问题' }}</p>
         </div>
       </div>
@@ -118,6 +124,7 @@ onMounted(load)
       </template>
     </el-dialog>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -146,13 +153,13 @@ onMounted(load)
 .q-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .q-content {
   margin-top: 8px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--muted);
   line-height: 1.6;
   white-space: pre-wrap;
 }
@@ -162,7 +169,7 @@ onMounted(load)
   gap: 16px;
   margin-top: 8px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .q-answer {
@@ -174,7 +181,7 @@ onMounted(load)
 
 .qa-label {
   font-size: 13px;
-  color: #16a34a;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -189,7 +196,7 @@ onMounted(load)
 .qa-time {
   margin-top: 6px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .q-actions {
@@ -197,6 +204,6 @@ onMounted(load)
   justify-content: flex-end;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--line);
 }
 </style>

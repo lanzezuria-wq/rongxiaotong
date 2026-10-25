@@ -1,7 +1,10 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { listArticles } from '@/api/article'
+
+const loadError = ref(false)
 
 /**
  * 知识文章列表 —— 公开，只看已发布（status=1）。
@@ -22,6 +25,7 @@ function summarize(content) {
 }
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     const data = await listArticles({
@@ -33,6 +37,7 @@ async function load() {
     records.value = data?.records || []
     total.value = data?.total || 0
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -52,11 +57,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="article-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">知识文章</h2>
+          <h1 class="page-title">知识文章</h1>
           <p class="page-desc">农业种植、养殖与经营管理知识</p>
         </div>
       </div>
@@ -70,7 +76,7 @@ onMounted(load)
       </div>
 
       <div v-loading="loading" class="article-list">
-        <el-card v-for="a in records" :key="a.id" shadow="hover" class="article-card" @click="router.push(`/articles/${a.id}`)">
+        <el-card v-for="a in records" :key="a.id" shadow="never" class="article-card" @click="router.push(`/articles/${a.id}`)">
           <div class="ac-head">
             <span class="ac-title">{{ a.title }}</span>
           </div>
@@ -93,6 +99,7 @@ onMounted(load)
       </div>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -118,13 +125,13 @@ onMounted(load)
 .ac-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .ac-summary {
   margin-top: 8px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--muted);
   line-height: 1.6;
 }
 
@@ -134,7 +141,7 @@ onMounted(load)
   gap: 6px;
   margin-top: 10px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .ac-meta .el-icon {

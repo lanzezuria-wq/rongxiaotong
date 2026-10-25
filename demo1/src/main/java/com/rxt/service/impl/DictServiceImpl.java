@@ -9,6 +9,12 @@ import com.rxt.dto.DictDTO;
 import com.rxt.entity.DictItem;
 import com.rxt.mapper.DictItemMapper;
 import com.rxt.service.DictService;
+import com.rxt.service.OperationLogService;
+import com.rxt.security.SecurityUtils;
+import com.rxt.trade.mapper.ProductMapper;
+import com.rxt.trade.entity.Product;
+import com.rxt.finance.mapper.FinancingApplyMapper;
+import com.rxt.finance.entity.FinancingApply;
 import com.rxt.vo.DictVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +41,9 @@ import java.util.stream.Collectors;
 public class DictServiceImpl implements DictService {
 
     private final DictItemMapper dictItemMapper;
+    private final OperationLogService operationLogs;
+    private final ProductMapper productMapper;
+    private final FinancingApplyMapper financingMapper;
 
     @Override
     public List<DictVO> listByType(String type) {
@@ -66,6 +75,7 @@ public class DictServiceImpl implements DictService {
         item.setRemark(dto.getRemark());
 
         dictItemMapper.insert(item);
+        operationLogs.record(SecurityUtils.currentUserIdOrNull(), "新增字典项", item.getId());
         log.info("新增字典项：type={}, code={}, name={}", item.getType(), item.getCode(), item.getName());
 
         // 重新查一次再返回，这样 createTime / updateTime 是数据库真实写入的值
@@ -82,6 +92,9 @@ public class DictServiceImpl implements DictService {
         assertTypeValid(dto.getType());
         String code = dto.getCode().trim();
         // 排除自己：否则"只改名称、编码不变"也会被判定成编码冲突
+        if ((!exist.getType().equals(dto.getType()) || !exist.getCode().equals(code)) && isReferenced(exist)) {
+            throw new BizException(ResultCode.PARAM_ERROR, "该字典项正在被使用，不能修改类型或编码");
+        }
         assertCodeUnique(dto.getType(), code, id);
 
         DictItem update = new DictItem();
@@ -98,6 +111,7 @@ public class DictServiceImpl implements DictService {
         update.setRemark(dto.getRemark());
 
         dictItemMapper.updateById(update);
+        operationLogs.record(SecurityUtils.currentUserIdOrNull(), "修改字典项", id);
         log.info("编辑字典项：id={}, type={}, code={}", id, update.getType(), update.getCode());
 
         return DictVO.from(dictItemMapper.selectById(id));
@@ -116,27 +130,24 @@ public class DictServiceImpl implements DictService {
         }
         // 物理删除：t_dict 没有 deleted 列，字典项没有"回收站"语义
         dictItemMapper.deleteById(id);
+        operationLogs.record(SecurityUtils.currentUserIdOrNull(), "删除字典项", id);
         log.info("删除字典项：id={}, type={}, code={}", id, exist.getType(), exist.getCode());
     }
 
-    /**
-     * 判断字典项是否被业务表引用。
-     *
-     * <p><b>⚠️ 当前是未实现的占位实现，一律返回 false（允许删除）。</b>
-     * 原因：引用它的表都属于 P2/P3，还没建：
-     * <pre>
-     *   product_category            → P2 商品表 t_product.category
-     *   fund_usage / industry / loan_term → P3 融资申请表
-     * </pre>
-     * 那些表存在之后，这里要改成对应的 {@code selectCount} 判断。
-     *
-     * <p>故意打 warn 日志而不是静默返回，是为了让这个缺口在联调时能被看见——
-     * 否则"删除校验没做"这件事会一直藏着，直到上线后被用户删掉正在用的分类。
-     */
+    /** 已被业务数据引用的编码必须保持可解析。 */
     private boolean isReferenced(DictItem item) {
-        log.warn("字典项引用检查尚未实现（P2/P3 业务表未建），本次直接允许删除：type={}, code={}",
-                item.getType(), item.getCode());
-        return false;
+        if (DictConst.TYPE_PRODUCT_CATEGORY.equals(item.getType())) {
+            return productMapper.selectCount(new LambdaQueryWrapper<Product>()
+                    .eq(Product::getCategoryCode, item.getCode())) > 0;
+        }
+        LambdaQueryWrapper<FinancingApply> query = new LambdaQueryWrapper<>();
+        switch (item.getType()) {
+            case DictConst.TYPE_FUND_USAGE -> query.eq(FinancingApply::getUsage, item.getCode());
+            case DictConst.TYPE_INDUSTRY -> query.eq(FinancingApply::getIndustry, item.getCode());
+            case DictConst.TYPE_LOAN_TERM -> query.eq(FinancingApply::getLoanTerm, item.getCode());
+            default -> throw new BizException(ResultCode.PARAM_ERROR, "未知字典类型");
+        }
+        return financingMapper.selectCount(query) > 0;
     }
 
     /** 类型白名单校验。表41："字典类型固定（产品分类/资金用途/所属行业/贷款期限）" */

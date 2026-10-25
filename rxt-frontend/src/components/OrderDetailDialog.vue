@@ -105,18 +105,18 @@ async function load() {
 .od-no {
   font-size: 14px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .od-time {
   margin-top: 4px;
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .od-sku {
   font-size: 12px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .od-rows {
@@ -133,12 +133,12 @@ async function load() {
 
 .lbl {
   width: 68px;
-  color: #8a9099;
+  color: var(--muted);
   flex-shrink: 0;
 }
 
 .od-total {
-  color: #e64545;
+  color: var(--accent-strong);
   font-weight: 600;
 }
 </style>

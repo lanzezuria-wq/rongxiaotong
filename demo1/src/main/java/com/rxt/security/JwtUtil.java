@@ -45,7 +45,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    /** 签名密钥。HS256 是对称加密，同一个 key 既用于签发也用于验签 */
+    /** 签名密钥。HS256 是对称签名，同一个 key 既用于签发也用于验签 */
     private final SecretKey key;
 
     /** Token 有效期（秒）。需求规定 24 小时 */
@@ -64,20 +64,20 @@ public class JwtUtil {
      * <ul>
      *   <li>{@code sub}（subject）—— 用户 id。用 sub 而不是自定义 claim，因为这是 JWT 标准字段，
      *       解析时一行 {@code getSubject()} 就能拿到；</li>
-     *   <li>{@code phone}、{@code role} —— 放进 Token 后，鉴权过滤器不用查库就能知道角色，
-     *       省一次数据库往返。代价是改了角色要等 Token 过期才生效（P1 可以接受）。</li>
+     *   <li>role 为签发快照；ver 为凭证版本。过滤器从数据库读取当前权限和版本。</li>
      * </ul>
      *
-     * <p>注意：Token 里<b>绝不放密码或任何敏感信息</b>。JWT 的 payload 只是 Base64 编码，
+     * <p>注意：Token 里<b>绝不放密码或任何敏感信息</b>。JWT 的 payload 只是 Base64URL 编码，
      * 不是加密——任何人复制这个串去 base64 解码都能看到内容。
      */
-    public String generate(Long userId, String phone, String role) {
+    public String generate(Long userId, String phone, String role, Integer tokenVersion) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + expireSeconds * 1000);
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("phone", phone)
                 .claim("role", role)
+                .claim("ver", tokenVersion == null ? 0 : tokenVersion)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(key, Jwts.SIG.HS256)

@@ -1,354 +1,51 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { getBanners, getRecommended, getHomeArticles, getStats } from '@/api/home'
+import { reactive, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { getRecommended, getHomeArticles, getStats } from '@/api/home'
 import ProductCard from '@/components/ProductCard.vue'
-
-/**
- * 首页 —— 聚合轮播、统计、推荐商品、热门文章四块内容（SRS 首页聚合页）。
- *
- * <p>全部数据对游客开放，进页面直接拉。四块数据彼此独立，
- * 用 Promise.all 并发请求，避免串行等待把首屏拖慢。
- */
-const loading = ref(false)
-const banners = ref([])
+import RequestState from '@/components/RequestState.vue'
+const router = useRouter()
+const search = ref('')
 const recommended = ref([])
 const articles = ref([])
-const stats = ref({ productCount: 0, financingSuccess: 0, userCount: 0 })
-
-async function load() {
-  loading.value = true
-  try {
-    const [b, r, a, s] = await Promise.all([
-      getBanners(),
-      getRecommended(),
-      getHomeArticles(),
-      getStats()
-    ])
-    banners.value = b || []
-    recommended.value = r || []
-    articles.value = a || []
-    stats.value = s || {}
-  } catch (e) {
-    // 拦截器已统一提示
-  } finally {
-    loading.value = false
-  }
+const stats = ref(null)
+const state = reactive({ products: 'loading', articles: 'loading', stats: 'loading' })
+async function loadProducts() {
+  state.products = 'loading'
+  try { recommended.value = await getRecommended() || []; state.products = 'ready' }
+  catch { state.products = 'error' }
 }
-
-onMounted(load)
+async function loadArticles() {
+  state.articles = 'loading'
+  try { articles.value = await getHomeArticles() || []; state.articles = 'ready' }
+  catch { state.articles = 'error' }
+}
+async function loadStats() {
+  state.stats = 'loading'
+  try { stats.value = await getStats(); state.stats = 'ready' }
+  catch { state.stats = 'error' }
+}
+function findProducts() { router.push({ path: '/products', query: search.value.trim() ? { keyword: search.value.trim() } : {} }) }
+onMounted(() => { loadProducts(); loadArticles(); loadStats() })
 </script>
-
 <template>
-  <div class="home" v-loading="loading">
-    <!-- 轮播图 / 兜底 Hero：字典里没配 banner 时用静态横幅兜底 -->
-    <section class="hero">
-      <el-carousel v-if="banners.length" height="360px" class="hero-carousel">
-        <el-carousel-item v-for="b in banners" :key="b.id">
-          <el-image :src="b.imageUrl" fit="cover" class="hero-img">
-            <template #error>
-              <div class="hero-fallback">
-                <h1>融销通 · 让农产品卖得更好</h1>
-                <p>农产品交易 · 融资服务 · 专家助力 一站式农业金融服务平台</p>
-              </div>
-            </template>
-          </el-image>
-          <div class="hero-caption">{{ b.title }}</div>
-        </el-carousel-item>
-      </el-carousel>
-      <div v-else class="hero-fallback">
-        <div class="hero-blob hero-blob-1" />
-        <div class="hero-blob hero-blob-2" />
-        <div class="hero-blob hero-blob-3" />
-        <h1>融销通 · 让农产品卖得更好</h1>
-        <p>农产品交易 · 融资服务 · 专家助力 一站式农业金融服务平台</p>
-        <div class="hero-actions">
-          <el-button size="large" round class="hero-cta" @click="$router.push('/products')">去逛农产品</el-button>
-          <el-button size="large" round class="hero-ghost" @click="$router.push('/experts')">咨询专家</el-button>
-        </div>
+  <div class="home">
+    <section class="home-hero container">
+      <div class="hero-copy"><h1>田间的好物，<br />生活的好滋味。</h1><p>在融销通，发现农产品，寻找农业资金支持，<br class="desktop-break" />让专业知识陪伴每一次耕耘。</p>
+        <form class="hero-search" @submit.prevent="findProducts"><el-icon :size="20"><Search /></el-icon><input v-model="search" aria-label="搜索农产品" placeholder="试试大米、苹果、新鲜蔬菜" /><button type="submit" class="button-link">发现好物<el-icon><ArrowRight /></el-icon></button></form>
+        <div class="hero-keywords"><span>从一份好食材开始</span><router-link to="/products?category=GRAIN">粮油</router-link><router-link to="/products?category=FRUIT">水果</router-link><router-link to="/products?category=VEG">蔬菜</router-link></div>
       </div>
+      <div class="hero-photograph"><img src="/images/longsheng-terraces.jpg" alt="广西龙胜梯田，层叠田野间的农业风景" fetchpriority="high" /><div class="hero-photo-caption"><span>广西 · 龙胜梯田</span><span>耕耘，让土地长出可能。</span></div></div>
     </section>
-
-    <!-- 平台统计（Mock 数字） -->
-    <section class="container stats">
-      <div class="stat-card">
-        <div class="stat-icon" style="--c: #16a34a"><el-icon><Goods /></el-icon></div>
-        <div class="stat-num">{{ stats.productCount }}</div>
-        <div class="stat-label">在售商品</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="--c: #d97706"><el-icon><Coin /></el-icon></div>
-        <div class="stat-num">{{ stats.financingSuccess }}</div>
-        <div class="stat-label">融资成功（笔）</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="--c: #0891b2"><el-icon><User /></el-icon></div>
-        <div class="stat-num">{{ stats.userCount }}</div>
-        <div class="stat-label">注册用户</div>
-      </div>
+    <section class="container service-paths" aria-label="农业服务入口">
+      <router-link to="/products" class="service-path"><el-icon><Goods /></el-icon><div><h2>把好收成带回家</h2><p>发现农产品与背后的农户</p></div><el-icon class="path-arrow"><TopRight /></el-icon></router-link>
+      <router-link to="/financing/groups" class="service-path"><el-icon><Connection /></el-icon><div><h2>为下一季添份支持</h2><p>了解联保小组与融资申请</p></div><el-icon class="path-arrow"><TopRight /></el-icon></router-link>
+      <router-link to="/experts" class="service-path"><el-icon><ChatDotRound /></el-icon><div><h2>让专业走进田间</h2><p>向农业专家提问与预约</p></div><el-icon class="path-arrow"><TopRight /></el-icon></router-link>
     </section>
-
-    <!-- 热卖推荐 -->
-    <section class="container section">
-      <div class="section-head">
-        <h2 class="section-title">热卖推荐</h2>
-        <el-link type="primary" @click="$router.push('/products')">
-          查看全部 <el-icon><ArrowRight /></el-icon>
-        </el-link>
-      </div>
-      <div v-if="recommended.length" class="product-grid">
-        <ProductCard v-for="p in recommended" :key="p.id" :product="p" />
-      </div>
-      <el-empty v-else description="暂无在售商品" />
+    <section class="container home-section"><div class="section-heading"><div><h2>好物，值得被看见</h2><p>从粮油到果蔬，挑选你需要的农产品。</p></div><router-link to="/products" class="text-link">逛逛农产品集市<el-icon><ArrowRight /></el-icon></router-link></div>
+      <RequestState :loading="state.products === 'loading'" :error="state.products === 'error'" :empty="state.products === 'ready' && !recommended.length" empty-text="暂无在售农产品，稍后再来看看" @retry="loadProducts"><div class="product-grid"><ProductCard v-for="p in recommended.slice(0, 8)" :key="p.id" :product="p" /></div></RequestState>
     </section>
-
-    <!-- 热门知识 -->
-    <section class="container section">
-      <div class="section-head">
-        <h2 class="section-title">农业知识</h2>
-      </div>
-      <el-card v-if="articles.length" shadow="never">
-        <div v-for="(a, i) in articles" :key="a.id" class="article-item">
-          <span class="article-index">{{ i + 1 }}</span>
-          <span class="article-title">{{ a.title }}</span>
-          <span class="article-views"><el-icon><View /></el-icon> {{ a.viewCount ?? 0 }}</span>
-        </div>
-      </el-card>
-      <el-empty v-else description="暂无文章" />
-    </section>
+    <section class="container knowledge-section"><div class="knowledge-intro"><h2>让经验，<br />助力每季丰收。</h2><p>读一篇农业知识，<br />为田间的每个问题多找一个答案。</p><router-link to="/articles" class="text-link">浏览农业知识<el-icon><ArrowRight /></el-icon></router-link></div><div class="knowledge-list"><RequestState :loading="state.articles === 'loading'" :error="state.articles === 'error'" :empty="state.articles === 'ready' && !articles.length" empty-text="农业知识正在整理中" @retry="loadArticles"><router-link v-for="a in articles" :key="a.id" :to="`/articles/${a.id}`" class="knowledge-row"><div><span class="knowledge-category">农业知识</span><h3>{{ a.title }}</h3><span class="muted">{{ a.viewCount ?? 0 }} 次阅读</span></div><el-icon><TopRight /></el-icon></router-link></RequestState></div></section>
+    <section class="container platform-record"><div><h2>在这里，农业相互连接</h2><p>{{ stats?.demoMode ? '当前为课程演示数据环境，以下为库内实时统计。' : '以下数据来自平台当前记录。' }}</p></div><div v-if="state.stats === 'ready'" class="platform-totals"><div><strong>{{ stats.productCount }}</strong><span>在售农产品</span></div><div><strong>{{ stats.financingSuccess }}</strong><span>已通过联保小组</span></div><div><strong>{{ stats.userCount }}</strong><span>注册账户</span></div></div><el-button v-else-if="state.stats === 'error'" @click="loadStats">统计加载失败，重试</el-button><span v-else class="muted" role="status">正在读取平台记录…</span></section>
   </div>
 </template>
-
-<style scoped>
-.home {
-  min-height: 60vh;
-}
-
-/* ---------- 轮播 ---------- */
-.hero {
-  margin-bottom: 24px;
-}
-
-.hero-carousel .hero-img {
-  width: 100%;
-  height: 360px;
-  display: block;
-}
-
-.hero-caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 12px 24px;
-  color: #fff;
-  font-size: 15px;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.45));
-}
-
-.hero-fallback {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 420px;
-  color: #fff;
-  background: linear-gradient(120deg, #064e3b 0%, #0f7a3d 30%, #16a34a 60%, #34d399 100%);
-  background-size: 300% 300%;
-  animation: hero-gradient 14s ease infinite;
-}
-
-.hero-fallback h1 {
-  position: relative;
-  margin: 0 0 14px;
-  font-size: 42px;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.hero-fallback p {
-  position: relative;
-  margin: 0;
-  font-size: 15px;
-  opacity: 0.92;
-}
-
-.hero-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  pointer-events: none;
-}
-
-.hero-blob-1 {
-  width: 360px;
-  height: 360px;
-  background: rgba(74, 222, 128, 0.55);
-  top: -100px;
-  left: -80px;
-}
-
-.hero-blob-2 {
-  width: 300px;
-  height: 300px;
-  background: rgba(167, 243, 208, 0.45);
-  bottom: -80px;
-  right: -60px;
-}
-
-.hero-blob-3 {
-  width: 200px;
-  height: 200px;
-  background: rgba(254, 240, 138, 0.4);
-  bottom: 60px;
-  left: 32%;
-}
-
-.hero-actions {
-  position: relative;
-  display: flex;
-  gap: 14px;
-  margin-top: 30px;
-}
-
-.hero-cta {
-  color: #16a34a;
-  background: #fff;
-  border: none;
-  font-weight: 600;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-}
-
-.hero-ghost {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(6px);
-}
-
-.hero-ghost:hover {
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
-}
-
-/* ---------- 统计 ---------- */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.stat-card {
-  position: relative;
-  overflow: hidden;
-  padding: 24px;
-  text-align: center;
-  background: #fff;
-  border-radius: 12px;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(16, 163, 74, 0.1);
-}
-
-.stat-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 12px;
-  font-size: 22px;
-  color: var(--c);
-  background: color-mix(in srgb, var(--c) 14%, #fff);
-  border-radius: 12px;
-}
-
-.stat-num {
-  font-size: 32px;
-  font-weight: 800;
-  background: linear-gradient(120deg, #16a34a, #059669);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.stat-label {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #8a9099;
-}
-
-/* ---------- 区块 ---------- */
-.section {
-  margin-bottom: 32px;
-}
-
-.section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.section-title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: #1f2329;
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-/* ---------- 文章列表 ---------- */
-.article-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 4px;
-  border-bottom: 1px solid #f0f2f5;
-}
-
-.article-item:last-child {
-  border-bottom: none;
-}
-
-.article-index {
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  background: #16a34a;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.article-title {
-  flex: 1;
-  font-size: 14px;
-  color: #1f2329;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.article-views {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #8a9099;
-  flex-shrink: 0;
-}
-</style>

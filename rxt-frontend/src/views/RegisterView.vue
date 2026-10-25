@@ -1,4 +1,6 @@
 <script setup>
+import AuthScene from '@/components/AuthScene.vue'
+import BrandMark from '@/components/BrandMark.vue'
 import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -108,19 +110,11 @@ async function handleRegister() {
 
 <template>
   <div class="auth-wrapper">
-    <div class="auth-brand-panel">
-      <div class="panel-brand"><span class="panel-dot" />融销通</div>
-      <h1 class="panel-title">让农产品<br />卖得更好</h1>
-      <p class="panel-sub">农产品交易 · 融资服务 · 专家助力</p>
-      <ul class="panel-features">
-        <li>农户开店卖货，直达买家</li>
-        <li>联保小组互助，银行融资</li>
-        <li>农业专家在线答疑指导</li>
-      </ul>
-    </div>
+    <AuthScene />
 
-    <div class="auth-form-panel">
+    <div class="auth-form-panel" id="main-content" tabindex="-1">
       <div class="auth-card">
+        <div class="auth-mobile-brand"><BrandMark compact /></div>
         <div class="auth-brand">
           <h1 class="auth-brand-title">创建账号</h1>
           <p class="auth-brand-sub">加入融销通，连接农业与金融</p>
@@ -199,28 +193,3 @@ async function handleRegister() {
     </div>
   </div>
 </template>
-
-<style scoped>
-.auth-card {
-  width: 460px;
-}
-
-.role-hint {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  margin-top: 8px;
-  font-size: 12px;
-  line-height: 1.6;
-  color: #d97706;
-}
-
-.link {
-  color: #16a34a;
-  text-decoration: none;
-}
-
-.link:hover {
-  text-decoration: underline;
-}
-</style>

@@ -46,6 +46,9 @@ public class User {
     /** 连续登录失败次数，登录成功要清零 */
     private Integer failCount;
 
+    /** 改密时递增，使此前签发的凭证失效。 */
+    private Integer tokenVersion;
+
 
     private LocalDateTime lockUntil;
 

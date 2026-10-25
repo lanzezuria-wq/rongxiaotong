@@ -1,4 +1,6 @@
 <script setup>
+import AuthScene from '@/components/AuthScene.vue'
+import BrandMark from '@/components/BrandMark.vue'
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -19,6 +21,8 @@ import { homePath } from '@/router'
  */
 const route = useRoute()
 const router = useRouter()
+
+const demoMode = import.meta.env.DEV || import.meta.env.VITE_DEMO_MODE === 'true'
 
 const formRef = ref(null)
 const loading = ref(false)
@@ -46,7 +50,7 @@ const rules = {
 }
 
 async function handleLogin() {
-  if (!formRef.value) return
+  if (!formRef.value || loading.value) return
 
   // validate() 校验失败会 reject，必须 catch，否则控制台报未处理的 Promise
   const valid = await formRef.value.validate().catch(() => false)
@@ -62,7 +66,7 @@ async function handleLogin() {
 
     // 登录前如果被守卫拦过，query.redirect 里存着原目标；没有就去角色对应的首页
     const redirect = route.query.redirect
-    if (redirect) {
+    if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//') && !redirect.startsWith('/login') && !redirect.startsWith('/register')) {
       // 用 replace 而不是 push：登录页不该留在历史记录里，否则点"后退"会回到登录页
       router.replace(redirect)
     } else {
@@ -91,31 +95,24 @@ function fillAccount(phone) {
 
 <template>
   <div class="auth-wrapper">
-    <div class="auth-brand-panel">
-      <div class="panel-brand"><span class="panel-dot" />融销通</div>
-      <h1 class="panel-title">让农产品<br />卖得更好</h1>
-      <p class="panel-sub">农产品交易 · 融资服务 · 专家助力</p>
-      <ul class="panel-features">
-        <li>农户开店卖货，直达买家</li>
-        <li>联保小组互助，银行融资</li>
-        <li>农业专家在线答疑指导</li>
-      </ul>
-    </div>
+    <AuthScene />
 
-    <div class="auth-form-panel">
+    <div class="auth-form-panel" id="main-content" tabindex="-1">
       <div class="auth-card">
+        <div class="auth-mobile-brand"><BrandMark compact /></div>
         <div class="auth-brand">
-          <h1 class="auth-brand-title">欢迎回来</h1>
-          <p class="auth-brand-sub">登录融销通账号</p>
+          <h1 class="auth-brand-title">登录融销通</h1>
+          <p class="auth-brand-sub">继续你的农业好生意</p>
         </div>
 
-        <div class="tip-box">
-          <div style="margin-bottom: 6px; font-weight: 600">测试账号（密码统一 123456）</div>
+        <div v-if="demoMode" class="tip-box demo-accounts">
+          <div style="margin-bottom: 6px; font-weight: 600">演示体验 · 选择角色填入账号</div>
           <div class="tip-accounts">
             <el-button size="small" text type="primary" @click="fillAccount('13900000000')">管理员</el-button>
             <el-button size="small" text type="primary" @click="fillAccount('13900000004')">农户</el-button>
-            <el-button size="small" text type="primary" @click="fillAccount('13900000003')">待审核专家</el-button>
-          </div>
+            <el-button size="small" text type="primary" @click="fillAccount('13900000006')">农业专家</el-button>
+          <el-button size="small" text type="primary" @click="fillAccount('13900000001')">银行专员</el-button></div>
+          <small>仅演示环境使用，密码为 123456。</small>
         </div>
 
         <el-form
@@ -153,19 +150,3 @@ function fillAccount(phone) {
     </div>
   </div>
 </template>
-
-<style scoped>
-.tip-accounts {
-  display: flex;
-  gap: 4px;
-}
-
-.link {
-  color: #16a34a;
-  text-decoration: none;
-}
-
-.link:hover {
-  text-decoration: underline;
-}
-</style>

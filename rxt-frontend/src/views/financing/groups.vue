@@ -1,10 +1,13 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { listGroups, joinGroup, listFinancing } from '@/api/financing'
 import { INDUSTRY_OPTIONS } from '@/utils/format'
 import GroupCard from '@/components/GroupCard.vue'
+
+const loadError = ref(false)
 
 /**
  * 联保小组列表 —— 浏览可加入的小组，并支持直接加入。
@@ -21,6 +24,7 @@ const joiningId = ref(null)
 const query = reactive({ industry: '', province: '' })
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     groups.value =
@@ -28,6 +32,7 @@ async function load() {
     const data = await listFinancing({ page: 1, size: 1, status: 0 })
     activeApplyId.value = data?.records?.[0]?.id ?? null
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -60,11 +65,12 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="groups-page">
     <div class="container">
       <div class="page-header" style="padding-top: 20px">
         <div>
-          <h2 class="page-title">联保小组</h2>
+          <h1 class="page-title">联保小组</h1>
           <p class="page-desc">加入 3~10 人联保小组，互相担保向银行申请融资</p>
         </div>
         <el-button type="primary" @click="$router.push('/financing/apply')">申请融资</el-button>
@@ -91,6 +97,7 @@ onMounted(load)
         style="padding: 60px 0" />
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>

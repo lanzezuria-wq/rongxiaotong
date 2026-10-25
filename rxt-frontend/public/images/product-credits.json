@@ -1,0 +1,146 @@
+[
+  {
+    "name": "apples",
+    "file": "apples.jpg",
+    "title": "Red Apple",
+    "creator": "Abhijit Tembhekar from Mumbai, India",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Red_Apple.jpg"
+  },
+  {
+    "name": "rice",
+    "file": "rice.jpg",
+    "title": "Uncooked ST25 rice on bamboo surface",
+    "creator": "VinhNguyen.1257",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Uncooked_ST25_rice_on_bamboo_surface.jpg"
+  },
+  {
+    "name": "eggs",
+    "file": "eggs.jpg",
+    "title": "Eggs in basket 2020 G1",
+    "creator": "George Chernilevsky",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Eggs_in_basket_2020_G1.jpg"
+  },
+  {
+    "name": "oranges",
+    "file": "oranges.jpg",
+    "title": "Oranges - whole-halved-segment",
+    "creator": "Ivar Leidus",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Oranges_-_whole-halved-segment.jpg"
+  },
+  {
+    "name": "coffee",
+    "file": "coffee.jpg",
+    "title": "Roasted coffee beans",
+    "creator": "MarkSweep",
+    "license": "public domain",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Roasted_coffee_beans.jpg"
+  },
+  {
+    "name": "pears",
+    "file": "pears.jpg",
+    "title": "Four pears",
+    "creator": "Rhododendrites",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Four_pears.jpg"
+  },
+  {
+    "name": "crab",
+    "file": "crab.jpg",
+    "title": "EriocheirSinensis1",
+    "creator": "Christian Fischer",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:EriocheirSinensis1.jpg"
+  },
+  {
+    "name": "fish",
+    "file": "fish.jpg",
+    "title": "Frozen hairtail fish strips",
+    "creator": "Fumikas Sagisavas",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Frozen_hairtail_fish_strips.jpg"
+  },
+  {
+    "name": "lamb",
+    "file": "lamb.jpg",
+    "title": "Raw lamb cutlets with shredded ginger and rosemary",
+    "creator": "Photo by User:Salimfadhley",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Raw_lamb_cutlets_with_shredded_ginger_and_rosemary.jpg"
+  },
+  {
+    "name": "goji",
+    "file": "goji.jpg",
+    "title": "Goji dried berries",
+    "creator": "Myrabella",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Goji_dried_berries.jpg"
+  },
+  {
+    "name": "millet",
+    "file": "millet.jpg",
+    "title": "MILLET grains India",
+    "creator": "Nandhinikandhasamy",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:MILLET_grains_India.jpg"
+  },
+  {
+    "name": "mango",
+    "file": "mango.jpg",
+    "title": "Ripe mango and apple",
+    "creator": "Hajia Hijjah",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ripe_mango_and_apple.jpg"
+  },
+  {
+    "name": "yam",
+    "file": "yam.jpg",
+    "title": "Roots of chinese yam (Dioscorea polystachya)",
+    "creator": "Maor X",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Roots_of_chinese_yam_(Dioscorea_polystachya).jpg"
+  },
+  {
+    "name": "chicken",
+    "file": "chicken.jpg",
+    "title": "Whole raw chicken - Japan Dec 22 2019",
+    "creator": "Nesnad",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Whole_raw_chicken_-_Japan_Dec_22_2019.jpeg"
+  },
+  {
+    "name": "vegetables",
+    "file": "vegetables.jpg",
+    "title": "Bok choy bunches.jpg",
+    "creator": "Jeffery Martin",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Bok_choy_bunches.jpg"
+  },
+  {
+    "name": "soybeans",
+    "file": "soybeans.jpg",
+    "title": "CSIRO ScienceImage 3272 Soybeans.jpg",
+    "creator": "Amy Wilson, CSIRO",
+    "license": "CC BY 3.0",
+    "licenseUrl": "",
+    "source": "https://commons.wikimedia.org/wiki/File:CSIRO_ScienceImage_3272_Soybeans.jpg"
+  }
+]

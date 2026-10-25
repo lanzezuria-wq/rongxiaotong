@@ -1,4 +1,5 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { reactive, ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { listArticles, auditArticle } from '@/api/admin'
@@ -10,6 +11,8 @@ import {
   ARTICLE_STATUS_OPTIONS,
   roleLabel
 } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 文章审核（SRS 表40 / 表58）。
@@ -60,6 +63,7 @@ const dialog = reactive({
 const preview = reactive({ visible: false, row: null })
 
 async function fetchList() {
+  loadError.value = false
   loading.value = true
   try {
     const params = { page: query.page, size: query.size }
@@ -70,6 +74,7 @@ async function fetchList() {
     tableData.value = data.records || []
     pageInfo.total = data.total || 0
   } catch (e) {
+    loadError.value = true
     tableData.value = []
     pageInfo.total = 0
   } finally {
@@ -139,10 +144,11 @@ onMounted(fetchList)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="fetchList">
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">文章审核</h2>
+        <h1 class="page-title">文章审核</h1>
         <p class="page-desc">
           审核农户发布的知识文章。通过后文章对公众可见；拒绝需填写理由。
           专家发布的文章无需审核。
@@ -203,7 +209,7 @@ onMounted(fetchList)
     </div>
 
     <div class="table-card">
-      <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%">
+      <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column prop="id" label="ID" width="70" align="center" />
 
         <el-table-column label="标题" min-width="240">
@@ -408,6 +414,7 @@ onMounted(fetchList)
       </template>
     </el-dialog>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -450,14 +457,14 @@ onMounted(fetchList)
   margin: 0 0 12px;
   font-size: 19px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .preview-meta {
   display: flex;
   align-items: center;
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .preview-tags {

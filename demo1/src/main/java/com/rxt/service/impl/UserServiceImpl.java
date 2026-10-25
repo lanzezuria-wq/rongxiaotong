@@ -40,6 +40,9 @@ public class UserServiceImpl implements UserService {
     @Value("${rxt.mock.verify-code}")
     private String mockVerifyCode;
 
+    @Value("${rxt.mock.enabled:true}")
+    private boolean mockEnabled;
+
     /** 连续登录失败上限 */
     @Value("${rxt.security.max-fail-count}")
     private int maxFailCount;
@@ -55,8 +58,11 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public RegisterVO register(RegisterDTO dto) {
         // ① 验证码（SRS 表11：Mock 固定为 111111）
+        if (!mockEnabled || mockVerifyCode.isBlank()) {
+            throw new BizException(ResultCode.PARAM_ERROR, "短信服务尚未配置，暂不开放注册");
+        }
         if (!mockVerifyCode.equals(dto.getVerifyCode())) {
-            throw new BizException(ResultCode.VERIFY_CODE_ERROR, "验证码错误，请输入 " + mockVerifyCode);
+            throw new BizException(ResultCode.VERIFY_CODE_ERROR, "验证码错误，请检查后重试");
         }
 
         // ② 手机号唯一性
@@ -86,6 +92,7 @@ public class UserServiceImpl implements UserService {
         // 专家待审核，农户/买家直接可用（SRS 表11 业务规则）
         user.setStatus(UserConst.ROLE_EXPERT.equals(role) ? UserConst.STATUS_PENDING : UserConst.STATUS_NORMAL);
         user.setFailCount(0);
+        user.setTokenVersion(0);
         userMapper.insert(user);
         // insert 之后 user.getId() 已经被 MyBatis-Plus 回填（@TableId(type = IdType.AUTO) 的作用）
 
@@ -94,7 +101,7 @@ public class UserServiceImpl implements UserService {
         // ⑤ 只有"直接可用"的账号才签发 Token（自动登录）；专家要等审核，给 null
         String token = null;
         if (UserConst.STATUS_NORMAL == user.getStatus()) {
-            token = jwtUtil.generate(user.getId(), user.getPhone(), user.getRole());
+            token = jwtUtil.generate(user.getId(), user.getPhone(), user.getRole(), user.getTokenVersion());
         }
         return RegisterVO.of(user, token);
     }
@@ -103,9 +110,10 @@ public class UserServiceImpl implements UserService {
     // 2. 登录
     // ==================================================================================
     @Override
+    @Transactional(noRollbackFor = BizException.class)
     public LoginVO login(LoginDTO dto) {
-        User user = userMapper.selectOne(
-                new LambdaQueryWrapper<User>().eq(User::getPhone, dto.getPhone()));
+        // 同一账号串行校验与计数；认证失败也必须提交失败次数。
+        User user = userMapper.selectByPhoneForUpdate(dto.getPhone());
 
         // ① 账号不存在 —— 故意和"密码错误"返回完全一样的结果。
         //    如果这里提示"账号不存在"、那里提示"密码错误"，攻击者就能靠文案差异
@@ -146,7 +154,7 @@ public class UserServiceImpl implements UserService {
         log.info("用户登录成功：phone={}, role={}", user.getPhone(), user.getRole());
 
         // ⑥ 用内存里这份 user 生成 Token（它已经被改成最新的状态，不用再查库）
-        String token = jwtUtil.generate(user.getId(), user.getPhone(), user.getRole());
+        String token = jwtUtil.generate(user.getId(), user.getPhone(), user.getRole(), user.getTokenVersion());
         return LoginVO.of(token, jwtUtil.getExpireSeconds(), user);
     }
 
@@ -206,7 +214,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void changePassword(Long userId, UpdatePasswordDTO dto) {
-        User user = userMapper.selectById(userId);
+        User user = userMapper.selectByIdForUpdate(userId);
         if (user == null) {
             throw new BizException(ResultCode.RESOURCE_NOT_FOUND, "用户不存在");
         }
@@ -224,12 +232,11 @@ public class UserServiceImpl implements UserService {
         // ③ 写新密码。密码字段用 .set() 显式更新，避免 updateById 的 null 跳过策略带来意外
         userMapper.update(null, new LambdaUpdateWrapper<User>()
                 .eq(User::getId, userId)
-                .set(User::getPassword, passwordEncoder.encode(dto.getNewPassword())));
+                .set(User::getPassword, passwordEncoder.encode(dto.getNewPassword()))
+                .setSql("token_version = token_version + 1"));
 
         log.info("用户修改密码成功：userId={}", userId);
-        // ⚠️ SRS 表13 还要求"强制下线"。JWT 是无状态的，服务端没有会话可以销毁，
-        //    真正的强制下线需要 Token 黑名单（Redis 或表），不在 P1 范围内。
-        //    当前由前端清掉 localStorage 里的 Token 达成，联调时要和前端确认这一条。
+        // 版本递增后，所有设备上此前签发的 Token 都无法再通过鉴权。
     }
 
     // ==================================================================================

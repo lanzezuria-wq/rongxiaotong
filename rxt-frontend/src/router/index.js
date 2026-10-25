@@ -1,3 +1,4 @@
+import { watch } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { isLoggedIn, isAdmin, isFarmer, isBank, authState } from '@/utils/auth'
@@ -231,6 +232,11 @@ const routes = [
         meta: { title: '文章审核' }
       },
       {
+        path: 'logs', name: 'admin-logs',
+        component: () => import('@/views/admin/OperationLogView.vue'),
+        meta: { title: '操作日志' }
+      },
+      {
         path: 'dict',
         name: 'admin-dict',
         component: () => import('@/views/admin/DictManageView.vue'),
@@ -313,5 +319,12 @@ router.beforeEach((to) => {
 if (authState.token && !authState.user) {
   import('@/utils/auth').then(({ clearAuth }) => clearAuth())
 }
+
+watch(() => authState.token, (token) => {
+  const current = router.currentRoute.value
+  if (!token && current.matched.length && !current.meta.public) {
+    router.replace({ path: '/login', query: { redirect: current.fullPath } })
+  }
+})
 
 export default router

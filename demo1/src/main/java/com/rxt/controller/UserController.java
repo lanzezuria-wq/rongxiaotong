@@ -8,6 +8,7 @@ import com.rxt.dto.UpdatePasswordDTO;
 import com.rxt.security.LoginRateLimiter;
 import com.rxt.security.SecurityUtils;
 import com.rxt.service.UserService;
+import com.rxt.security.ClientIpResolver;
 import com.rxt.vo.LoginVO;
 import com.rxt.vo.RegisterVO;
 import com.rxt.vo.UserVO;
@@ -47,6 +48,7 @@ public class UserController {
 
     private final UserService userService;
     private final LoginRateLimiter loginRateLimiter;
+    private final ClientIpResolver clientIpResolver;
 
     @Operation(summary = "用户注册",
             description = "角色只允许 farmer（农户/买家）或 expert（专家）。"
@@ -58,7 +60,7 @@ public class UserController {
                                        HttpServletRequest request) {
         // IP 级限流放在最先：防止用脚本批量注册/撞库。
         // 账号级"连错 5 次锁定"在 Service 里，两者互补，缺一不可。
-        loginRateLimiter.check(clientIp(request));
+        loginRateLimiter.check(clientIpResolver.resolve(request));
         RegisterVO vo = userService.register(dto);
         return Result.ok(vo.getNeedAudit() ? "注册成功，请等待管理员审核" : "注册成功", vo);
     }
@@ -68,7 +70,7 @@ public class UserController {
     @PostMapping("/login")
     public Result<LoginVO> login(@Valid @RequestBody LoginDTO dto,
                                  HttpServletRequest request) {
-        loginRateLimiter.check(clientIp(request));
+        loginRateLimiter.check(clientIpResolver.resolve(request));
         return Result.ok("登录成功", userService.login(dto));
     }
 
@@ -95,27 +97,4 @@ public class UserController {
         return Result.ok("密码修改成功，请重新登录", null);
     }
 
-    /**
-     * 取客户端真实 IP。
-     *
-     * <p>不能直接用 {@code request.getRemoteAddr()}：经过 Nginx 等反向代理后，
-     * 它拿到的是代理的 IP，所有用户会共用同一个限流计数，
-     * 表现是"一个人被限流，全公司都登不上"。要按优先级从代理头里取原始 IP。
-     *
-     * <p>{@code X-Forwarded-For} 可能是逗号分隔的列表（客户端, 代理1, 代理2），
-     * 第一个才是真实客户端，所以只取逗号前那段。
-     *
-     * <p>⚠️ 安全提示：这些头是客户端可以伪造的，未接可信代理时不能当作强身份凭证。
-     * 本项目用它只是为了挡脚本，够用。
-     */
-    private String clientIp(HttpServletRequest request) {
-        for (String header : new String[]{"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP"}) {
-            String value = request.getHeader(header);
-            if (value != null && !value.isBlank() && !"unknown".equalsIgnoreCase(value)) {
-                int comma = value.indexOf(',');
-                return comma > 0 ? value.substring(0, comma).trim() : value.trim();
-            }
-        }
-        return request.getRemoteAddr();
-    }
 }

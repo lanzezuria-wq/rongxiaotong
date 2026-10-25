@@ -1,9 +1,12 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getArticle, likeArticle, commentArticle } from '@/api/article'
 import { isLoggedIn } from '@/utils/auth'
+
+const loadError = ref(false)
 
 /**
  * 文章详情 —— 正文 + 点赞 + 评论（游客可读，点赞/评论需登录）。
@@ -18,11 +21,13 @@ const commentText = ref('')
 const submitting = ref(false)
 
 async function load() {
+  loadError.value = false
   loading.value = true
   try {
     article.value = await getArticle(route.params.id)
     document.title = `${article.value?.title || '文章详情'} · 融销通`
   } catch (e) {
+    loadError.value = true
     // 拦截器已统一提示
   } finally {
     loading.value = false
@@ -76,6 +81,7 @@ onMounted(load)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="load">
   <div class="article-detail-page">
     <div class="container">
       <div v-loading="loading" class="detail-wrap">
@@ -139,6 +145,7 @@ onMounted(load)
       </div>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -158,7 +165,7 @@ onMounted(load)
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
   line-height: 1.4;
 }
 
@@ -168,11 +175,11 @@ onMounted(load)
   gap: 6px;
   margin-top: 12px;
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .ad-author {
-  color: #16a34a;
+  color: var(--accent);
   font-weight: 500;
 }
 
@@ -202,13 +209,13 @@ onMounted(load)
 
 .ad-comment-count {
   font-size: 13px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .comment-card .card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--ink);
 }
 
 .comment-input {
@@ -221,7 +228,7 @@ onMounted(load)
 
 .comment-item {
   padding: 12px 0;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--line);
 }
 
 .comment-item:last-child {
@@ -235,12 +242,12 @@ onMounted(load)
 }
 
 .ci-user {
-  color: #1f2329;
+  color: var(--ink);
   font-weight: 500;
 }
 
 .ci-time {
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .ci-content {

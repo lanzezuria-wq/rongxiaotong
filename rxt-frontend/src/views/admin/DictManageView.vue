@@ -1,8 +1,11 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { reactive, ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listDictByType, createDict, updateDict, deleteDict } from '@/api/admin'
 import { DICT_TYPE_OPTIONS } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 数据字典管理（SRS 表41 / 表59-4~7，共 4 个接口）。
@@ -77,11 +80,13 @@ const rules = {
 }
 
 async function fetchList() {
+  loadError.value = false
   loading.value = true
   try {
     const data = await listDictByType(activeType.value)
     tableData.value = data || []
   } catch (e) {
+    loadError.value = true
     tableData.value = []
   } finally {
     loading.value = false
@@ -206,10 +211,11 @@ onMounted(fetchList)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="fetchList">
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">数据字典</h2>
+        <h1 class="page-title">数据字典</h1>
         <p class="page-desc">
           维护平台的下拉选项。字典类型固定为四类，它们会被商品、融资申请等业务模块直接引用。
           停用的字典项不会在前端下拉框出现。
@@ -245,7 +251,7 @@ onMounted(fetchList)
     </el-card>
 
     <div class="table-card">
-      <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%">
+      <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column prop="id" label="ID" width="70" align="center" />
 
         <el-table-column label="编码" width="160">
@@ -363,6 +369,7 @@ onMounted(fetchList)
       </template>
     </el-dialog>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
@@ -373,14 +380,14 @@ onMounted(fetchList)
 .type-hint {
   margin-top: 14px;
   font-size: 12.5px;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .type-hint code {
   padding: 2px 6px;
   font-family: 'SF Mono', Menlo, Consolas, monospace;
-  color: #16a34a;
-  background: #f0fdf4;
+  color: var(--accent);
+  background: var(--accent-soft);
   border-radius: 4px;
 }
 
@@ -407,7 +414,7 @@ onMounted(fetchList)
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.6;
-  color: #8a9099;
+  color: var(--muted);
 }
 
 .field-hint.inline {

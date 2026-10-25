@@ -111,8 +111,8 @@ service.interceptors.response.use(
     if (!error.response) {
       const msg =
         error.code === 'ECONNABORTED'
-          ? '请求超时，请检查后端服务是否正常运行'
-          : '网络异常，无法连接后端服务（默认 http://127.0.0.1:8080）'
+          ? '请求超时，请稍后重试'
+          : '暂时无法连接服务，请检查网络后重试'
       ElMessage.error(msg)
       return Promise.reject(error)
     }
@@ -132,6 +132,11 @@ service.interceptors.response.use(
         break
 
       // 1007 权限不足：**不能跳登录页**！用户已登录，只是这个角色不能访问
+      case 1003:
+        if (authState.token) redirectToLogin('账户当前不可用，请联系平台管理员')
+        else ElMessage.error(res?.message || '账户当前不可用')
+        break
+
       case 1007:
         ElMessage.error(res?.message || '没有权限执行该操作')
         break

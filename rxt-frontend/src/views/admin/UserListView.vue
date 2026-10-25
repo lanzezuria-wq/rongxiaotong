@@ -1,4 +1,5 @@
 <script setup>
+import RequestState from '@/components/RequestState.vue'
 import { reactive, ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listUsers, changeUserStatus } from '@/api/admin'
@@ -11,6 +12,8 @@ import {
   userStatusTagType,
   USER_STATUS_FILTER_OPTIONS
 } from '@/utils/format'
+
+const loadError = ref(false)
 
 /**
  * 用户管理（SRS 表38 / 表59-1、2）。
@@ -48,6 +51,7 @@ const pageInfo = reactive({
 const currentUserId = computed(() => authState.user?.id)
 
 async function fetchList() {
+  loadError.value = false
   loading.value = true
   try {
     // 空值不要发给后端 —— @RequestParam(required=false) 收到空串会被当成
@@ -67,6 +71,7 @@ async function fetchList() {
     pageInfo.total = data.total || 0
     pageInfo.pages = data.pages || 0
   } catch (e) {
+    loadError.value = true
     tableData.value = []
     pageInfo.total = 0
   } finally {
@@ -116,7 +121,7 @@ async function toggleStatus(row) {
     await ElMessageBox.confirm(
       isDisabled(row)
         ? `启用后，「${row.name || row.phone}」将可以正常登录系统。`
-        : `禁用后，「${row.name || row.phone}」将无法登录系统，其已签发的登录凭证也会在过期前保持有效。确定继续？`,
+        : `禁用后，「${row.name || row.phone}」将无法登录系统，现有登录凭证会立即失效。确定继续？`,
       `${actionText}账号`,
       {
         confirmButtonText: `确定${actionText}`,
@@ -142,10 +147,11 @@ onMounted(fetchList)
 </script>
 
 <template>
+  <RequestState :error="loadError" @retry="fetchList">
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">用户管理</h2>
+        <h1 class="page-title">用户管理</h1>
         <p class="page-desc">
           查看平台全部注册账号，按角色、状态或关键词筛选，并启用 / 禁用账号。
           禁用后该账号无法登录。
@@ -216,7 +222,7 @@ onMounted(fetchList)
 
     <!-- 表格 -->
     <div class="table-card">
-      <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%">
+      <el-table v-loading="loading" :data="tableData" style="width: 100%">
         <el-table-column prop="id" label="ID" width="70" align="center" />
 
         <el-table-column prop="phone" label="手机号" width="130" />
@@ -283,6 +289,7 @@ onMounted(fetchList)
               <el-button size="small" disabled>禁用</el-button>
             </el-tooltip>
 
+            <router-link v-else-if="row.role === 'expert' && [0, 2].includes(row.status)" to="/admin/expert-audit" class="text-link">查看审核</router-link>
             <el-button
               v-else
               size="small"
@@ -314,6 +321,7 @@ onMounted(fetchList)
       </div>
     </div>
   </div>
+  </RequestState>
 </template>
 
 <style scoped>
