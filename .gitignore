@@ -63,3 +63,7 @@ config/application-local.yml
 .env
 .env.*
 !.env.example
+
+# Python 脚本运行缓存（tools/ 下有端到端验证脚本）
+__pycache__/
+*.pyc

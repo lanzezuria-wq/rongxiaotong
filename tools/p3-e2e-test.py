@@ -89,10 +89,13 @@ def check(name, cond, detail=""):
 
 
 def login(phone):
-    st, res = call("POST", "/user/login", body={"phone": phone, "password": "123456"})
-    if st != 200 or res.get("code") != 0:
-        raise SystemExit("登录失败 %s：%s %s" % (phone, st, res))
-    return res["data"]["token"]
+    # 局部变量不能叫 st / res —— 模块级已占用这两个名字，同名会触发
+    # pylint 的 redefined-outer-name（华为云规则 G.VAR.03）。
+    http_status, payload = call("POST", "/user/login",
+                                body={"phone": phone, "password": "123456"})
+    if http_status != 200 or payload.get("code") != 0:
+        raise SystemExit("登录失败 %s：%s %s" % (phone, http_status, payload))
+    return payload["data"]["token"]
 
 
 def register(phone, role="farmer"):
@@ -107,15 +110,18 @@ def future(days=2):
 
 def first_apply_id(token, status=0):
     """取某用户指定状态的申请 id。空列表时返回 None 而不是抛异常。"""
-    st, res = call("GET", "/financing/list?status=%d" % status, token)
-    records = (res.get("data") or {}).get("records") or []
+    # HTTP 状态码这里用不上，用 _ 占位；既不遮蔽外部 st，也不会被报未使用变量。
+    _, payload = call("GET", "/financing/list?status=%d" % status, token)
+    records = (payload.get("data") or {}).get("records") or []
     return records[0]["id"] if records else None
 
 
-def group_total(group_id, token):
+def group_total(gid, token):
     """从小组详情（单对象接口）读 totalAmount，避免解析数组里的嵌套结构。"""
-    st, res = call("GET", "/financing/group/%d" % group_id, token)
-    return float(res["data"]["totalAmount"])
+    # 参数名不能叫 group_id —— 脚本后半段有全局 group_id（模块级），
+    # 参数同名会触发 redefined-outer-name。
+    _, payload = call("GET", "/financing/group/%d" % gid, token)
+    return float(payload["data"]["totalAmount"])
 
 
 print("=" * 78)
