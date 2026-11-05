@@ -2,9 +2,9 @@
 name: "融销通"
 description: "现代农业门户与专业浅色工作台，以农业绿色连接交易、联保融资和专家服务。"
 colors:
-  accent: "#216448"
-  accent-strong: "#174c36"
-  accent-soft: "#e7f0e8"
+  accent: "#285b43"
+  accent-strong: "#1b4230"
+  accent-soft: "#eaf0e5"
   primary-light-3: "#558a6f"
   primary-light-5: "#8ab29b"
   primary-light-7: "#c0d7c7"
@@ -12,23 +12,23 @@ colors:
   primary-light-9: "#edf4ef"
   warning: "#986516"
   danger: "#b44435"
-  bg: "#f5f7f4"
+  bg: "#f6f6f2"
   surface: "#fff"
-  surface-soft: "#eef3ee"
-  ink: "#202f27"
+  surface-soft: "#f0f2eb"
+  ink: "#202c27"
   text-regular: "#46534a"
-  muted: "#626e66"
+  muted: "#647068"
   placeholder: "#6d786f"
-  line: "#dfe5df"
+  line: "#e0e4dc"
   field-border: "#d8e0d9"
   focus: "#6b997b"
-  sidebar: "#f0f4ee"
-  sidebar-active: "#e0e9df"
+  sidebar: "#eef0e8"
+  sidebar-active: "#dfe8d6"
   card-hover-border: "#93b29b"
 typography:
   display:
     fontFamily: "'Songti SC', 'Noto Serif CJK SC', serif"
-    fontSize: "clamp(36px, 3.8vw, 54px)"
+    fontSize: "clamp(42px, 4.4vw, 64px)"
     fontWeight: 500
     lineHeight: 1.4
     letterSpacing: "-0.02em"
@@ -59,9 +59,9 @@ typography:
     letterSpacing: "0.03em"
 rounded:
   tag: "4px"
-  control: "6px"
-  panel: "8px"
-  dialog: "12px"
+  control: "8px"
+  panel: "14px"
+  dialog: "16px"
   circle: "50%"
 spacing:
   "4": "4px"
@@ -130,7 +130,7 @@ components:
     padding: "18px"
   nav-active:
     textColor: "{colors.accent}"
-    padding: "32px 0 29px"
+    padding: "27px 0 25px"
   group-seat-filled:
     backgroundColor: "{colors.accent-soft}"
     textColor: "{colors.accent}"
@@ -145,7 +145,7 @@ components:
 
 **Creative North Star: "现代农业门户与专业浅色工作台"**
 
-以农业绿色连接农产品交易、三人联保和专家服务。门户以田野摄影、商品内容和中文衬线标题建立农业识别；业务工作台用浅中性色、清晰的系统中文正文、细分隔和状态文字支持办理任务。
+以农业绿色连接农产品交易、三人联保和专家服务。门户以全宽梯田摄影、居中衬线标题和可用搜索建立农业识别；业务工作台用浅中性色、清晰的系统中文正文、细分隔和状态文字支持办理任务。
 
 同一品牌覆盖公共门户、个人业务、银行和平台管理。页面密度按任务调整：门户给内容留白，表格与表单保持可扫描的结构；绿色集中用于品牌、主操作、当前导航和正常状态，待处理与拒绝各有语义颜色。
 
@@ -156,7 +156,21 @@ components:
 - 平面卡片与细边界组织内容，深度主要来自色面和留白。
 - 三人联保用真实成员席位表达成组条件。
 
-本文件是已实现系统的扫描记录，前置 YAML 是规范 token 层；它记录源代码中的可复用值，不把每个页面的一次性数值提升为全站规范。主要来源为 `rxt-frontend/src/styles/global.css`、`styles/surfaces.css` 及共用组件。方向承接 `PRODUCT.md` 与 `.impeccable/surfaces/platform.md`，页面策略留在方向合同中。
+本文件是已实现系统的扫描记录，前置 YAML 是规范 token 层；它记录源代码中的可复用值，不把每个页面的一次性数值提升为全站规范。主要来源为 `rxt-frontend/src/styles/global.css`、`src/styles/surfaces.css`、`src/styles/workspace.css` 及共用组件。方向承接 `PRODUCT.md` 与 `.impeccable/surfaces/platform.md`，页面策略留在方向合同中。
+
+### 本轮参考与取舍（2026-11-05）
+
+本轮保留原有农业品牌与业务结构。门户采用摄影构图；交易、融资、问答和银行增加分区导航。全部页面共享边界、面板与表单样式。沿用 Element Plus 的真实组件源码，不引入额外组件库或外部字体。
+
+| 实际访问的网站 | 观察与产品关系 | 本项目取舍 |
+| --- | --- | --- |
+| [AgriDigital](https://www.agridigital.io/) | 农业供应链题材；首屏摄影背景、居中大标题和主入口 | 作为静态构图参考，使用项目已有授权梯田照片。菜单复演被100%加载层遮挡，动态行为未核验，不声称1:1还原。 |
+| [Agreena](https://agreena.com/) | 农业实景与按受众分类的服务导航；滚动后呈现方案内容 | 借鉴题材与服务分区；不采用其碳信用营销承诺。 |
+| [Shopify](https://www.shopify.com/) | 商品场景、清晰主操作与分区内容；滚动后介绍工具 | 保留可用搜索、商品与角色入口；不增加促销或虚构业绩。 |
+| [Linear](https://linear.app/) | 低噪声导航与工作区示例；内容依业务步骤组织 | 用于业务页层级分析；保持项目浅色工作台。 |
+| [Supabase](https://supabase.com/) | 功能入口分组、标题与状态层级；模块点击进入对应功能 | 保留真实业务分组；不引入开发工具题材和深色全站皮肤。 |
+
+实际截图、DOM与侦察记录位于 `rxt-frontend/ref/`，本轮运行验证位于 `.impeccable/review/lsf-20261105/`。LSF 的 source/prototype/paired 严格对账尚未通过，不能将本轮称为完整LSF流程认证。AI Studio停在首次条款确认；本轮保留既有文案，没有代用户接受条款或调用外部模型。
 
 ## Colors
 
@@ -190,7 +204,7 @@ components:
 
 ### Hierarchy
 
-- **Display**：门户主标题为 YAML 的 `display`；中屏覆盖到（40px），手机到（38px）。认证场景标题使用 `clamp(30px, 3.6vw, 48px)`、字重（500）、行高（1.4）。
+- **Display**：门户主标题为 YAML 的 `display`；中屏覆盖到（52px），手机到（40px）。认证场景标题使用 `clamp(30px, 3.6vw, 48px)`、字重（500）、行高（1.4）。
 - **Headline**：业务页标题为 `headline`；手机缩为（24px）。门户区段标题使用（28px / 600），手机（24px）。
 - **Title**：商品名采用 `title`，最多两行；手机缩为（14px）。对话框标题为（20px / 600），业务卡片标题常用（18px / 550）。
 - **Body**：全局（14px / 1.6）；门户主说明为（16px / 1.9），手机（14px）；文章内容为（16px / 2），手机（15px）。页标题说明最大宽度（65ch）。
@@ -199,7 +213,7 @@ components:
 
 ## Layout
 
-公共容器最大宽度（1280px），桌面左右内边距（40px）；页头最大宽度（1440px）、最小高度（88px）。门户首屏为等分两列，列距（52px）；服务入口三列，商品四列、间距（24px）；联保与专家列表三列。个人中心使用（188px）导航列与（44px）列距。
+公共容器最大宽度（1280px），桌面左右内边距（40px）；页头最大宽度（1440px）、最小高度（80px）。门户首屏为全宽照片与居中内容；服务入口三列，商品四列、间距（24px）；联保与专家列表三列。个人中心使用（188px）导航列与（44px）列距。
 
 工作台桌面固定侧栏宽（236px），工作区左偏移相同，内边距（30px 36px 56px）；桌面内容页标题与内容间隔（28px）。常用间距是 YAML 中已观测的 px 步长，不存在已实现的 rem 倍比或统一 CSS 间距变量。
 
@@ -210,13 +224,13 @@ components:
 | 大于 1100px | 门户桌面导航；工作台固定侧栏；商品四列；联保与专家三列。 |
 | 768–1100px | 门户导航折叠；公共容器边距 28px；商品三列，联保与专家两列；工作台改为 236px 抽屉，内容无左偏移、边距 28px。 |
 | 不大于 767px | 门户页头 72px，公共边距 20px；首屏与服务入口单列、商品两列间距 12px；联保与专家单列；个人导航横向滚动；工作台内容边距 24px 16px，导航仍为抽屉。 |
-| 不小于 1441px | 认证场景上边距 60px，标题起点 12vh，照片高度 34vh。 |
+| 不小于 1441px | 认证场景上边距60px；背景摄影铺满左栏，标题位于场景下半部。 |
 
 手机表单标签置于字段上方，复杂详情为单列；表格和 SKU 编辑保留容器内滚动，SKU 表最小宽（560px）。对话框最大宽为 `calc(100vw - 32px)`。分页在手机隐藏每页数量与跳页，保留页码。
 
 购物车在不大于（1100px）时使用“选择框／64px 图片／商品名”网格，将数量、单价、小计分行并标明文字；结算在不大于（767px）时用“52px 图片／商品信息”两列，数量和小计另起一行。联保摘要和成员席位允许换行。这些规则保护任务内容，不把桌面表格整体缩小。
 
-手机按钮、图标按钮、输入、选择、复选框及数量输入以最小（44px）高度为主要触控规则。桌面业务按钮最小（36px），门户按钮（42px），输入包装（40px）；不得把这些最小值当作所有控件的最终固定高度。
+手机按钮、图标按钮、输入、选择、复选框及数量输入以最小（44px）高度为主要触控规则。桌面业务按钮最小（36px），首页搜索按钮（44px），输入包装（40px）；不得把这些最小值当作所有控件的最终固定高度。
 
 ## Elevation & Depth
 
@@ -231,9 +245,9 @@ components:
 
 ## Shapes
 
-常规面板与商品卡片使用 `panel` 圆角；按钮、导航和输入使用 `control`；标签使用 `tag`；对话框使用 `dialog`。头像与联保成员席位为正圆。主要边界是（1px）实线；空席位为虚线。
+常规面板与商品卡片使用 `panel` 圆角；输入使用 `control`，按钮与导航沿用现有6px到9px的局部圆角；标签使用 `tag`；对话框使用 `dialog`。头像与联保成员席位为正圆。主要边界是（1px）实线；空席位为虚线。
 
-门户首屏照片的右上角单独弯曲：桌面 `4px 70px 4px 4px`，手机 `4px 44px 4px 4px`。这是首页图像的局部形状，不是全站卡片模板。商品图片比例（4:3）、`object-fit: cover`；商品详情手机主图高度（300px）。
+门户首屏采用全宽照片、深色遮罩和居中文字。桌面最小高度620px，手机540px。照片保留来源说明，搜索宽度不超过580px。商品图片继续使用4:3比例。
 
 ## Components
 
@@ -253,13 +267,13 @@ components:
 
 商品卡片为整卡链接；图片失效或缺失均显示文本占位。主体内边距（18px），手机（13px）；商品名最多两行，价格突出数字，分类、销量、农户为辅助信息。悬停边界转 `card-hover-border`，照片仅放大（1.025），无抬升。
 
-表格面板常规内边距（20px），手机（16px 12px）；订单、融资和文章卡片常规（24px），手机（18px）。表格标题字重（500）、行内上下留白（16px），手机数据行（12px），不依靠厚重色块区分每行。
+表格面板常规内边距（24px），手机（16px 12px）；订单、融资和文章卡片常规（28px），手机（18px）。表格标题字重（500）、行内上下留白（16px），手机数据行（12px），不依靠厚重色块区分每行。
 
 ### Inputs / Fields
 
 白底、轻边界、控件圆角，默认包装内边距（1px 11px），输入值用常规正文色、光标用主色。占位文字不是标签的替代。焦点内描边转主色，校验错误转错误色并保留组件库的错误文字；禁用由组件库提供背景、文字、边界及禁止光标。
 
-首页搜索为原生输入与按钮组合，整体圆角（8px），输入键盘焦点使用（2px）主色外描边；不要将这套局部搜索样式替代全部业务字段。
+首页搜索为原生输入与按钮组合，整体圆角（10px），输入键盘焦点使用（2px）主色外描边；不要将这套局部搜索样式替代全部业务字段。
 
 ### Navigation
 
@@ -279,7 +293,7 @@ components:
 
 ### Motion and media
 
-动效只承接既有入口和交互：门户进入（0.65s）`cubic-bezier(.2,.7,.2,1)`，分项延迟（0.08/0.14/0.2s）；田野照片以（14s）缓慢交替放大，商品照片悬停（0.3s ease-out），工作台抽屉（0.2s ease-out）。`prefers-reduced-motion: reduce` 下关闭动画、过渡及平滑滚动。
+门户首屏为静态摄影，移除原来的循环缩放与分项入场。商品照片保留既有轻微缩放，业务抽屉保留现有开合过渡。`prefers-reduced-motion: reduce` 下关闭动画、过渡及平滑滚动。
 
 田野照片为 **Longsheng Rice Terraces November 2017 014**，作者 **King of Hearts**，来源 [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Longsheng_Rice_Terraces_November_2017_014.jpg)，许可 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)。本地文件为 `rxt-frontend/public/images/longsheng-terraces.jpg`；署名、原始链接与许可元数据见同目录 `credits.json`，用户入口为 `/images/credits.html` 与全站页脚。照片是农业场景素材，不声称平台经营该产地；变更素材或创作衍生版本时保留相应许可信息。
 
@@ -298,7 +312,7 @@ components:
 ### Don't:
 
 - Don't 使用大面积高饱和背景或装饰渐变替代已确认的浅色农业品牌。
-- Don't 将门户的不对称照片圆角、衬线标题或入口动效铺到业务表格与全部卡片。
+- Don't 将门户摄影和衬线标题铺到业务表格与全部卡片。
 - Don't 用随机人物评价、虚构审批事件、实际放款或平台业绩填充画面。
 - Don't 将照片所示产地表述为平台实际经营范围；不要移除演示金融说明。
 - Don't 为新页面加载未经确认的中文 Web 字体，或声称不同系统的字体和字重完全一致。

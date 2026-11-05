@@ -1,0 +1,57 @@
+/* 工作区共享层级适用于现有全部业务页，不接管请求或权限。 */
+.business-navigation { background: var(--surface); border-bottom: 1px solid var(--line); }
+.business-navigation-inner { display: flex; align-items: center; gap: 32px; min-height: 60px; }
+.business-scope { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.business-navigation nav { display: flex; gap: 26px; align-self: stretch; overflow-x: auto; }
+.business-navigation nav a { display: flex; align-items: center; color: var(--muted); white-space: nowrap; font-size: 13px; border-bottom: 2px solid transparent; padding: 16px 0; }
+.business-navigation nav a[aria-current='page'] { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+.business-navigation nav a:hover { color: var(--accent); }
+.business-bank-link { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 12px; white-space: nowrap; }
+.site-layout.site-layout .page-header, .workspace-content .page-header { padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.site-layout.site-layout .page-title, .workspace-content .page-title { letter-spacing: -.025em; }
+.site-layout.site-layout .el-card__header { border-bottom-color: var(--line); padding: 20px 24px; }
+.site-layout.site-layout .el-card__body { padding: 24px; }
+.site-layout.site-layout .product-list-page .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.site-layout.site-layout .expert-card { border-radius: var(--radius); }
+.site-layout.site-layout .article-card, .site-layout.site-layout .order-card, .site-layout.site-layout .fin-card, .site-layout.site-layout .q-card { padding: 28px; }
+.site-layout.site-layout .price-block { border-radius: 10px; }
+.site-layout.site-layout .status-tabs .el-radio-button__inner { padding: 11px 20px; }
+.site-layout.site-layout .filter-card .el-card__body { padding: 22px 24px; }
+.account-navigation { border-right: 1px solid var(--line); padding-right: 20px; }
+.account-navigation a { border-radius: 8px; }
+.workspace-sidebar nav a { border-radius: 9px; min-height: 46px; }
+.workspace-scope { text-transform: none; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.workspace-breadcrumb { padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.workspace-content .el-table { border-radius: 10px; }
+.workspace-content .table-card { padding: 24px; }
+.workspace-content .filter-bar { padding: 24px 24px 0; }
+.workspace-content .el-table th.el-table__cell { font-size: 12px; }
+.auth-scene > .brand-lockup { position: relative; z-index: 2; }
+.auth-scene::after { content: ''; position: absolute; inset: 0; background: #123e2a88; z-index: 0; }
+.auth-scene .auth-landscape { position: absolute; inset: 0; margin: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 1; }
+.auth-scene .auth-story { z-index: 1; margin-top: auto; margin-bottom: 120px; }
+.auth-scene .auth-credit { z-index: 1; position: absolute; bottom: 32px; left: 56px; right: 32px; color: #e0e8da; }
+.auth-card .auth-brand-title { font-size: 30px; letter-spacing: -.02em; }
+.auth-card .auth-brand-sub { color: var(--muted); }
+.tip-box { background: var(--surface-soft); border-color: var(--line); border-radius: 10px; }
+@media (max-width: 1100px) {
+  .business-navigation-inner { gap: 24px; }
+  .business-navigation nav { gap: 22px; }
+  .business-bank-link { display: none; }
+  .site-layout.site-layout .product-list-page .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+}
+@media (max-width: 767px) {
+  .business-navigation-inner { gap: 18px; min-height: 54px; }
+  .business-scope { font-size: 12px; }
+  .business-navigation nav { gap: 20px; }
+  .business-navigation nav a { font-size: 12px; padding: 14px 0; }
+  .site-layout.site-layout .page-header, .workspace-content .page-header { padding-bottom: 20px; }
+  .site-layout.site-layout .el-card__body, .site-layout.site-layout .el-card__header { padding: 18px; }
+  .site-layout.site-layout .filter-card .el-card__body { padding: 18px 16px; }
+  .site-layout.site-layout .product-list-page .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .site-layout.site-layout .article-card, .site-layout.site-layout .order-card, .site-layout.site-layout .fin-card, .site-layout.site-layout .q-card { padding: 18px; }
+  .site-layout.site-layout .status-tabs .el-radio-button__inner { padding: 10px 12px; }
+  .account-navigation { padding: 0 0 14px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .workspace-content .table-card { padding: 16px 12px; }
+  .workspace-content .filter-bar { padding: 18px 12px 0; }
+}

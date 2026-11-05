@@ -130,8 +130,8 @@ async function handleSubmit() {
         type="warning"
         :closable="false"
         show-icon
-        title="当前登录状态在修改密码后即失效"
-        description="Token 是无状态的，服务端无法远程作废已签发的凭证，因此本页会在修改成功后主动退出登录。"
+        title="修改密码后，所有设备需重新登录"
+        description="修改成功后，所有设备上的旧登录凭证都会失效。请使用新密码重新登录。"
         style="margin-bottom: 20px"
       />
 

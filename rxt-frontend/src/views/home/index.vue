@@ -30,8 +30,8 @@ onMounted(() => { loadProducts(); loadArticles(); loadStats() })
 </script>
 <template>
   <div class="home">
-    <section class="home-hero container">
-      <div class="hero-copy"><h1>田间的好物，<br />生活的好滋味。</h1><p>在融销通，发现农产品，寻找农业资金支持，<br class="desktop-break" />让专业知识陪伴每一次耕耘。</p>
+    <section class="home-hero">
+      <div class="hero-copy container"><span class="hero-eyebrow">农产品交易 · 联保融资 · 专家助力</span><h1>田间的好物，<br />生活的好滋味</h1><p>在融销通，发现农产品，寻找农业资金支持，<br class="desktop-break" />让专业知识陪伴每一次耕耘。</p>
         <form class="hero-search" @submit.prevent="findProducts"><el-icon :size="20"><Search /></el-icon><input v-model="search" aria-label="搜索农产品" placeholder="试试大米、苹果、新鲜蔬菜" /><button type="submit" class="button-link">发现好物<el-icon><ArrowRight /></el-icon></button></form>
         <div class="hero-keywords"><span>从一份好食材开始</span><router-link to="/products?category=GRAIN">粮油</router-link><router-link to="/products?category=FRUIT">水果</router-link><router-link to="/products?category=VEG">蔬菜</router-link></div>
       </div>
